@@ -49,6 +49,9 @@ clean: ## Clean build artifacts and test files
 	@rm -rf bin/
 	@echo "Clean complete"
 
+seed: ## Seed database with sample data (clubs, instructors, members)
+	@go run scripts/seed_data.go
+
 deps: ## Download dependencies
 	@echo "Downloading dependencies..."
 	@go mod download

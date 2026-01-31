@@ -63,6 +63,23 @@ go run main.go
 
 The server will start on `http://localhost:8080`
 
+### Seeding the Database
+
+For development, you can populate the database with sample data:
+
+```bash
+make seed
+```
+
+This will create:
+- 5 gym clubs with locations
+- 15 instructors with various specialties
+- 100 members with realistic membership data
+
+⚠️ **Note:** The seed script clears existing data before inserting sample data.
+
+See [scripts/README.md](scripts/README.md) for more details.
+
 ## API Endpoints
 
 ### Authentication Endpoints
