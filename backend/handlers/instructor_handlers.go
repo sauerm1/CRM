@@ -161,6 +161,7 @@ func (h *InstructorHandler) UpdateInstructor(w http.ResponseWriter, r *http.Requ
 			"specialty":  instructor.Specialty,
 			"bio":        instructor.Bio,
 			"active":     instructor.Active,
+			"club_ids":   instructor.ClubIDs,
 			"updated_at": instructor.UpdatedAt,
 		},
 	}

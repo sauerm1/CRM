@@ -3,8 +3,8 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getInstructor, updateInstructor, deleteInstructor } from '@/lib/api';
-import type { Instructor } from '@/types';
+import { getInstructor, updateInstructor, deleteInstructor, getClubs } from '@/lib/api';
+import type { Instructor, Club } from '@/types';
 
 export default function EditInstructorPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function EditInstructorPage({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,26 +20,33 @@ export default function EditInstructorPage({ params }: { params: Promise<{ id: s
     specialty: '',
     bio: '',
     active: true,
+    club_ids: [] as string[],
   });
 
   useEffect(() => {
-    loadInstructor();
+    loadData();
   }, []);
 
-  const loadInstructor = async () => {
+  const loadData = async () => {
     try {
-      const data = await getInstructor(id);
+      const [instructorData, clubsData] = await Promise.all([
+        getInstructor(id),
+        getClubs()
+      ]);
+      
+      setClubs(clubsData || []);
       setFormData({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        specialty: data.specialty || '',
-        bio: data.bio || '',
-        active: data.active ?? true,
+        name: instructorData.name || '',
+        email: instructorData.email || '',
+        phone: instructorData.phone || '',
+        specialty: instructorData.specialty || '',
+        bio: instructorData.bio || '',
+        active: instructorData.active ?? true,
+        club_ids: instructorData.club_ids || [],
       });
     } catch (error: any) {
-      console.error('Failed to load instructor:', error);
-      setError('Failed to load instructor: ' + error.message);
+      console.error('Failed to load data:', error);
+      setError('Failed to load data: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -49,6 +57,15 @@ export default function EditInstructorPage({ params }: { params: Promise<{ id: s
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
+  const handleClubToggle = (clubId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      club_ids: prev.club_ids.includes(clubId)
+        ? prev.club_ids.filter(id => id !== clubId)
+        : [...prev.club_ids, clubId]
     }));
   };
 
@@ -197,6 +214,35 @@ export default function EditInstructorPage({ params }: { params: Promise<{ id: s
                     rows={4}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-gray-900"
                   />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-900 mb-3">
+                    Club Locations *
+                  </label>
+                  <div className="space-y-2 p-4 border border-gray-300 rounded-md bg-gray-50">
+                    {clubs.length === 0 ? (
+                      <p className="text-sm text-gray-500">No clubs available. <Link href="/dashboard/clubs/new" className="text-blue-600 hover:underline">Create one first</Link>.</p>
+                    ) : (
+                      clubs.map((club) => (
+                        <div key={club.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`club-${club.id}`}
+                            checked={formData.club_ids.includes(club.id!)}
+                            onChange={() => handleClubToggle(club.id!)}
+                            className="h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                          />
+                          <label htmlFor={`club-${club.id}`} className="ml-2 block text-sm text-gray-900">
+                            {club.name} - {club.city}, {club.state}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {formData.club_ids.length === 0 && (
+                    <p className="mt-1 text-sm text-red-600">Please select at least one club location</p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">

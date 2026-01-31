@@ -50,6 +50,7 @@ func main() {
 	memberHandler := handlers.NewMemberHandler(db.Client.Database(db.DatabaseName))
 	classHandler := handlers.NewClassHandler(db.Client.Database(db.DatabaseName))
 	instructorHandler := handlers.NewInstructorHandler(db.Client.Database(db.DatabaseName))
+	clubHandler := handlers.NewClubHandler(db.Client.Database(db.DatabaseName))
 	authMiddleware := middleware.NewAuthMiddleware(db.Client.Database(db.DatabaseName), sessionConfig)
 
 	// Setup routes
@@ -84,6 +85,10 @@ func main() {
 	// Instructor routes - require authentication
 	mux.HandleFunc("/api/instructors", authMiddleware.RequireAuth(instructorHandler.InstructorsHandler))
 	mux.HandleFunc("/api/instructors/", authMiddleware.RequireAuth(instructorHandler.InstructorHandler))
+
+	// Club routes - require authentication
+	mux.HandleFunc("/api/clubs", authMiddleware.RequireAuth(clubHandler.ClubsHandler))
+	mux.HandleFunc("/api/clubs/", authMiddleware.RequireAuth(clubHandler.ClubHandler))
 
 	// Create server
 	srv := &http.Server{

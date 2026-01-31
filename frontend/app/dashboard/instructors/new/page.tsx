@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createInstructor } from '@/lib/api';
+import { createInstructor, getClubs } from '@/lib/api';
+import type { Club } from '@/types';
 
 export default function NewInstructorPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,7 +17,21 @@ export default function NewInstructorPage() {
     specialty: '',
     bio: '',
     active: true,
+    club_ids: [] as string[],
   });
+
+  useEffect(() => {
+    loadClubs();
+  }, []);
+
+  const loadClubs = async () => {
+    try {
+      const data = await getClubs();
+      setClubs(data || []);
+    } catch (error) {
+      console.error('Failed to load clubs:', error);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -25,8 +41,24 @@ export default function NewInstructorPage() {
     }));
   };
 
+  const handleClubToggle = (clubId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      club_ids: prev.club_ids.includes(clubId)
+        ? prev.club_ids.filter(id => id !== clubId)
+        : [...prev.club_ids, clubId]
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate at least one club is selected
+    if (formData.club_ids.length === 0) {
+      alert('Please select at least one club');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -137,6 +169,39 @@ export default function NewInstructorPage() {
                     rows={4}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 text-gray-900"
                   />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Clubs *
+                  </label>
+                  {clubs.length > 0 ? (
+                    <>
+                      <div className="space-y-2 p-4 border border-gray-300 rounded-md bg-gray-50">
+                        {clubs.map((club) => (
+                          <div key={club.id} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={`club-${club.id}`}
+                              checked={formData.club_ids.includes(club.id!)}
+                              onChange={() => handleClubToggle(club.id!)}
+                              className="h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                            />
+                            <label htmlFor={`club-${club.id}`} className="ml-2 block text-sm text-gray-900">
+                              {club.name} - {club.city}, {club.state}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {formData.club_ids.length === 0 && (
+                        <p className="mt-2 text-sm text-red-600">Please select at least one club</p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="p-4 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600">
+                      No clubs available. <Link href="/dashboard/clubs/new" className="text-green-600 hover:text-green-700 font-medium">Create a club first</Link>
+                    </div>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">

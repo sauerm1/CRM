@@ -8,6 +8,7 @@ import (
 
 type Class struct {
 	ID              primitive.ObjectID   `bson:"_id,omitempty" json:"id,omitempty"`
+	ClubID          *primitive.ObjectID  `bson:"club_id,omitempty" json:"club_id,omitempty"`
 	Name            string               `bson:"name" json:"name"`
 	Description     string               `bson:"description" json:"description"`
 	Instructor      string               `bson:"instructor" json:"instructor"`

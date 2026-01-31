@@ -188,6 +188,12 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center gap-4">
               <div className="flex gap-4">
                 <Link
+                  href="/dashboard/clubs"
+                  className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 font-medium"
+                >
+                  🏢 Clubs
+                </Link>
+                <Link
                   href="/dashboard/classes"
                   className="px-6 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 font-medium"
                 >

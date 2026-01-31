@@ -218,3 +218,34 @@ export const deleteInstructor = async (id: string) => {
     method: 'DELETE',
   });
 };
+
+// Club APIs
+export const getClubs = async () => {
+  return authenticatedFetch(`${API_BASE_URL}/api/clubs`);
+};
+
+export const getClub = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/clubs/${id}`);
+};
+
+export const createClub = async (clubData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/clubs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(clubData),
+  });
+};
+
+export const updateClub = async (id: string, clubData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/clubs/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(clubData),
+  });
+};
+
+export const deleteClub = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/clubs/${id}`, {
+    method: 'DELETE',
+  });
+};
