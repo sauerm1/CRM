@@ -159,20 +159,38 @@ func (h *OAuthHandler) handleCallback(w http.ResponseWriter, r *http.Request, pr
 		return
 	}
 
-	// Create session
+	// Create session (access token)
 	sessionToken, err := h.createSession(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to create session: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Set session cookie
+	// Create refresh token
+	refreshToken, err := h.createRefreshToken(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to create refresh token: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set access token cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     h.sessionConfig.CookieName,
+		Name:     h.sessionConfig.AccessTokenName,
 		Value:    sessionToken,
-		MaxAge:   h.sessionConfig.CookieMaxAge,
+		MaxAge:   h.sessionConfig.AccessTokenMaxAge,
 		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	})
+
+	// Set refresh token cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     h.sessionConfig.RefreshTokenName,
+		Value:    refreshToken,
+		MaxAge:   h.sessionConfig.RefreshTokenMaxAge,
+		HttpOnly: true,
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})
@@ -342,11 +360,38 @@ func (h *OAuthHandler) createSession(userID primitive.ObjectID) (string, error) 
 	session := models.Session{
 		UserID:    userID,
 		Token:     token,
-		ExpiresAt: time.Now().Add(time.Duration(h.sessionConfig.CookieMaxAge) * time.Second),
+		ExpiresAt: time.Now().Add(time.Duration(h.sessionConfig.AccessTokenMaxAge) * time.Second),
 		CreatedAt: time.Now(),
 	}
 
 	_, err = collection.InsertOne(ctx, session)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+// createRefreshToken creates a new refresh token for the user
+func (h *OAuthHandler) createRefreshToken(userID primitive.ObjectID) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection := h.db.Collection("refresh_tokens")
+
+	token, err := generateSessionToken()
+	if err != nil {
+		return "", err
+	}
+
+	refreshToken := models.RefreshToken{
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(time.Duration(h.sessionConfig.RefreshTokenMaxAge) * time.Second),
+		CreatedAt: time.Now(),
+	}
+
+	_, err = collection.InsertOne(ctx, refreshToken)
 	if err != nil {
 		return "", err
 	}
@@ -361,7 +406,7 @@ func (h *OAuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie(h.sessionConfig.CookieName)
+	cookie, err := r.Cookie(h.sessionConfig.AccessTokenName)
 	if err == nil {
 		// Delete session from database
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -371,9 +416,29 @@ func (h *OAuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		collection.DeleteOne(ctx, bson.M{"token": cookie.Value})
 	}
 
-	// Clear session cookie
+	// Also delete refresh token
+	refreshCookie, err := r.Cookie(h.sessionConfig.RefreshTokenName)
+	if err == nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		refreshCollection := h.db.Collection("refresh_tokens")
+		refreshCollection.DeleteOne(ctx, bson.M{"token": refreshCookie.Value})
+	}
+
+	// Clear access token cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     h.sessionConfig.CookieName,
+		Name:     h.sessionConfig.AccessTokenName,
+		Value:    "",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	})
+
+	// Clear refresh token cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     h.sessionConfig.RefreshTokenName,
 		Value:    "",
 		MaxAge:   -1,
 		HttpOnly: true,

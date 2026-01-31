@@ -129,7 +129,8 @@ export default function InstructorsPage() {
                   filteredInstructors.map((instructor) => (
                     <tr 
                       key={instructor.id}
-                      className="hover:bg-gray-50"
+                      onClick={() => router.push(`/dashboard/instructors/edit/${instructor.id}`)}
+                      className="hover:bg-gray-50 cursor-pointer"
                     >
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{instructor.name}</div>
@@ -153,7 +154,7 @@ export default function InstructorsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                           <Link
                             href={`/dashboard/instructors/edit/${instructor.id}`}
                             className="text-blue-600 hover:text-blue-900"

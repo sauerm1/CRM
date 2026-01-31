@@ -28,7 +28,7 @@ func NewAuthMiddleware(db *mongo.Database, sessionConfig *config.SessionConfig) 
 // RequireAuth is a middleware that requires authentication
 func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(m.sessionConfig.CookieName)
+		cookie, err := r.Cookie(m.sessionConfig.AccessTokenName)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
@@ -77,11 +77,10 @@ func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
-
 // OptionalAuth is a middleware that optionally authenticates the user
 func (m *AuthMiddleware) OptionalAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(m.sessionConfig.CookieName)
+		cookie, err := r.Cookie(m.sessionConfig.AccessTokenName)
 		if err != nil {
 			// No cookie, continue without authentication
 			next.ServeHTTP(w, r)

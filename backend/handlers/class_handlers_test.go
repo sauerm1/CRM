@@ -53,7 +53,7 @@ func TestGetClasses(t *testing.T) {
 	// Insert test data
 	collection := db.Collection("classes")
 	ctx := context.Background()
-	
+
 	testClass := models.Class{
 		ID:          primitive.NewObjectID(),
 		Name:        "Test Yoga",
@@ -67,7 +67,7 @@ func TestGetClasses(t *testing.T) {
 		Status:      "scheduled",
 		Recurring:   false,
 	}
-	
+
 	_, err := collection.InsertOne(ctx, testClass)
 	if err != nil {
 		t.Fatalf("Failed to insert test data: %v", err)

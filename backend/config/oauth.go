@@ -44,9 +44,11 @@ func InitOAuthConfig() *OAuthConfig {
 
 // SessionConfig holds session configuration
 type SessionConfig struct {
-	SecretKey    string
-	CookieName   string
-	CookieMaxAge int
+	SecretKey            string
+	AccessTokenName      string
+	AccessTokenMaxAge    int // in seconds
+	RefreshTokenName     string
+	RefreshTokenMaxAge   int // in seconds
 }
 
 // InitSessionConfig initializes session configuration
@@ -57,8 +59,10 @@ func InitSessionConfig() *SessionConfig {
 	}
 
 	return &SessionConfig{
-		SecretKey:    secretKey,
-		CookieName:   "session_token",
-		CookieMaxAge: 86400 * 7, // 7 days
+		SecretKey:            secretKey,
+		AccessTokenName:      "session_token",
+		AccessTokenMaxAge:    3600,        // 1 hour
+		RefreshTokenName:     "refresh_token",
+		RefreshTokenMaxAge:   86400 * 7,   // 7 days
 	}
 }

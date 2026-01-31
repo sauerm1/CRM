@@ -145,11 +145,11 @@ func TestCreateMember(t *testing.T) {
 	handler := NewMemberHandler(db)
 
 	newMember := map[string]interface{}{
-		"first_name":      "Alice",
-		"last_name":       "Johnson",
-		"email":           "alice.johnson@example.com",
-		"phone":           "5551234567",
-		"membership_type": "monthly",
+		"first_name":              "Alice",
+		"last_name":               "Johnson",
+		"email":                   "alice.johnson@example.com",
+		"phone":                   "5551234567",
+		"membership_type":         "monthly",
 		"emergency_contact_name":  "Bob Johnson",
 		"emergency_contact_phone": "5559876543",
 	}

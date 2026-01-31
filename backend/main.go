@@ -61,6 +61,7 @@ func main() {
 	// Local authentication routes
 	mux.HandleFunc("/auth/register", localAuthHandler.Register)
 	mux.HandleFunc("/auth/login", localAuthHandler.Login)
+	mux.HandleFunc("/auth/refresh", localAuthHandler.RefreshToken)
 
 	// OAuth routes
 	mux.HandleFunc("/auth/google", oauthHandler.GoogleLogin)

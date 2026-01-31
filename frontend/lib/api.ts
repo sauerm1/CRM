@@ -1,7 +1,54 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-// Helper function to handle API responses
-const handleResponse = async (response: Response) => {
+// Track if we're currently refreshing the token to avoid multiple simultaneous refresh requests
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
+// Helper function to refresh the access token
+const refreshAccessToken = async () => {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+  }).then(async (response) => {
+    isRefreshing = false;
+    refreshPromise = null;
+    if (!response.ok) {
+      throw new Error('Failed to refresh token');
+    }
+    return response.json();
+  }).catch((error) => {
+    isRefreshing = false;
+    refreshPromise = null;
+    throw error;
+  });
+
+  return refreshPromise;
+};
+
+// Helper function to handle API responses with automatic token refresh
+const handleResponse = async (response: Response, originalRequest?: () => Promise<Response>) => {
+  // If we get a 401 and we have a function to retry the request
+  if (response.status === 401 && originalRequest) {
+    try {
+      // Try to refresh the token
+      await refreshAccessToken();
+      // Retry the original request
+      const retryResponse = await originalRequest();
+      return handleResponse(retryResponse);
+    } catch (refreshError) {
+      // If refresh fails, redirect to login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired. Please login again.');
+    }
+  }
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'An error occurred' }));
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
@@ -11,6 +58,13 @@ const handleResponse = async (response: Response) => {
     return { message: 'Success' };
   }
   return response.json();
+};
+
+// Helper to make authenticated API calls with auto-refresh
+const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+  const makeRequest = () => fetch(url, { ...options, credentials: 'include' });
+  const response = await makeRequest();
+  return handleResponse(response, makeRequest);
 };
 
 // Auth APIs
@@ -46,11 +100,7 @@ export const logout = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/me`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/me`);
 };
 
 // OAuth URLs
@@ -59,161 +109,112 @@ export const getGitHubLoginUrl = () => `${API_BASE_URL}/auth/github`;
 
 // Member APIs (CRM)
 export const getMembers = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/members`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/members`);
 };
 
 export const getMember = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/members/${id}`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+  return authenticatedFetch(`${API_BASE_URL}/api/members/${id}`);
   return handleResponse(response);
 };
 
 export const createMember = async (member: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/members`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/members`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(member),
   });
-  return handleResponse(response);
 };
 
 export const updateMember = async (id: string, member: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/members/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/members/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(member),
   });
-  return handleResponse(response);
 };
 
 export const deleteMember = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/members/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/members/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
-  return handleResponse(response);
 };
 
 // Class APIs
 export const getClasses = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/classes`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/classes`);
 };
 
 export const getClass = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${id}`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${id}`);
 };
 
 export const getClassWithMembers = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${id}/details`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${id}/details`);
 };
 
 export const createClass = async (classData: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/classes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(classData),
   });
-  return handleResponse(response);
 };
 
 export const updateClass = async (id: string, classData: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(classData),
   });
-  return handleResponse(response);
 };
 
 export const deleteClass = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
-  return handleResponse(response);
 };
 
 export const enrollMember = async (classId: string, memberId: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${classId}/enroll`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${classId}/enroll`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify({ member_id: memberId }),
   });
-  return handleResponse(response);
 };
 
 export const unenrollMember = async (classId: string, memberId: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/classes/${classId}/unenroll/${memberId}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/classes/${classId}/unenroll/${memberId}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
-  return handleResponse(response);
 };
 
 // Instructor APIs
 export const getInstructors = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/instructors`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/instructors`);
 };
 
 export const getInstructor = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/instructors/${id}`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  return handleResponse(response);
+  return authenticatedFetch(`${API_BASE_URL}/api/instructors/${id}`);
 };
 
 export const createInstructor = async (instructorData: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/instructors`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/instructors`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(instructorData),
   });
-  return handleResponse(response);
 };
 
 export const updateInstructor = async (id: string, instructorData: any) => {
-  const response = await fetch(`${API_BASE_URL}/api/instructors/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/instructors/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(instructorData),
   });
-  return handleResponse(response);
 };
 
 export const deleteInstructor = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/instructors/${id}`, {
+  return authenticatedFetch(`${API_BASE_URL}/api/instructors/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
-  return handleResponse(response);
 };
