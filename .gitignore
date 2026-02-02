@@ -19,3 +19,18 @@ frontend/.env.production.local
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+
+# Mobile
+mobile/node_modules/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/.expo/
+mobile/.bundle/
+mobile/*.log
+mobile/.env.local
+mobile/.env.development.local
+mobile/.env.test.local
+mobile/.env.production.local
