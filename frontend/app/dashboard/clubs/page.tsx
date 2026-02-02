@@ -3,19 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getClubs, deleteClub, getRestaurants } from '@/lib/api';
-import type { Club, Restaurant } from '@/types';
+import { getClubs, deleteClub } from '@/lib/api';
+import type { Club } from '@/types';
 
 export default function ClubsPage() {
   const router = useRouter();
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadClubs();
-    loadRestaurants();
   }, []);
 
   const loadClubs = async () => {
@@ -27,19 +25,6 @@ export default function ClubsPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadRestaurants = async () => {
-    try {
-      const data = await getRestaurants();
-      setRestaurants(data || []);
-    } catch (error) {
-      console.error('Failed to load restaurants:', error);
-    }
-  };
-
-  const getClubRestaurant = (clubId: string) => {
-    return restaurants.find(r => r.club_id === clubId);
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -176,16 +161,6 @@ export default function ClubsPage() {
                           >
                             Edit
                           </Link>
-                          {getClubRestaurant(club.id!) ? (
-                            <Link
-                              href={`/dashboard/restaurants/${getClubRestaurant(club.id!)?.id}/reservations`}
-                              className="text-purple-600 hover:text-purple-900"
-                            >
-                              Restaurant
-                            </Link>
-                          ) : (
-                            <span className="text-gray-400">No Restaurant</span>
-                          )}
                           <button
                             onClick={() => handleDelete(club.id!, club.name)}
                             className="text-red-600 hover:text-red-900"
