@@ -53,6 +53,12 @@ func main() {
 	clubHandler := handlers.NewClubHandler(db.Client.Database(db.DatabaseName))
 	authMiddleware := middleware.NewAuthMiddleware(db.Client.Database(db.DatabaseName), sessionConfig)
 
+	// Initialize restaurant and reservation collections
+	restaurantCollection := db.Client.Database(db.DatabaseName).Collection("restaurants")
+	reservationCollection := db.Client.Database(db.DatabaseName).Collection("reservations")
+	officeCollection := db.Client.Database(db.DatabaseName).Collection("offices")
+	officeBookingCollection := db.Client.Database(db.DatabaseName).Collection("office_bookings")
+
 	// Setup routes
 	mux := http.NewServeMux()
 
@@ -89,6 +95,34 @@ func main() {
 	// Club routes - require authentication
 	mux.HandleFunc("/api/clubs", authMiddleware.RequireAuth(clubHandler.ClubsHandler))
 	mux.HandleFunc("/api/clubs/", authMiddleware.RequireAuth(clubHandler.ClubHandler))
+
+	// Restaurant routes - require authentication
+	mux.HandleFunc("GET /api/restaurants", authMiddleware.RequireAuth(handlers.GetRestaurants(restaurantCollection)))
+	mux.HandleFunc("POST /api/restaurants", authMiddleware.RequireAuth(handlers.CreateRestaurant(restaurantCollection)))
+	mux.HandleFunc("GET /api/restaurants/{id}", authMiddleware.RequireAuth(handlers.GetRestaurant(restaurantCollection)))
+	mux.HandleFunc("PUT /api/restaurants/{id}", authMiddleware.RequireAuth(handlers.UpdateRestaurant(restaurantCollection)))
+	mux.HandleFunc("DELETE /api/restaurants/{id}", authMiddleware.RequireAuth(handlers.DeleteRestaurant(restaurantCollection)))
+
+	// Reservation routes - require authentication
+	mux.HandleFunc("GET /api/reservations", authMiddleware.RequireAuth(handlers.GetReservations(reservationCollection)))
+	mux.HandleFunc("POST /api/reservations", authMiddleware.RequireAuth(handlers.CreateReservation(reservationCollection)))
+	mux.HandleFunc("GET /api/reservations/{id}", authMiddleware.RequireAuth(handlers.GetReservation(reservationCollection)))
+	mux.HandleFunc("PUT /api/reservations/{id}", authMiddleware.RequireAuth(handlers.UpdateReservation(reservationCollection)))
+	mux.HandleFunc("DELETE /api/reservations/{id}", authMiddleware.RequireAuth(handlers.DeleteReservation(reservationCollection)))
+
+	// Office routes - require authentication
+	mux.HandleFunc("GET /api/offices", authMiddleware.RequireAuth(handlers.GetOffices(officeCollection)))
+	mux.HandleFunc("POST /api/offices", authMiddleware.RequireAuth(handlers.CreateOffice(officeCollection)))
+	mux.HandleFunc("GET /api/offices/{id}", authMiddleware.RequireAuth(handlers.GetOffice(officeCollection)))
+	mux.HandleFunc("PUT /api/offices/{id}", authMiddleware.RequireAuth(handlers.UpdateOffice(officeCollection)))
+	mux.HandleFunc("DELETE /api/offices/{id}", authMiddleware.RequireAuth(handlers.DeleteOffice(officeCollection)))
+
+	// Office booking routes - require authentication
+	mux.HandleFunc("GET /api/office-bookings", authMiddleware.RequireAuth(handlers.GetOfficeBookings(officeBookingCollection)))
+	mux.HandleFunc("POST /api/office-bookings", authMiddleware.RequireAuth(handlers.CreateOfficeBooking(officeBookingCollection)))
+	mux.HandleFunc("GET /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.GetOfficeBooking(officeBookingCollection)))
+	mux.HandleFunc("PUT /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.UpdateOfficeBooking(officeBookingCollection)))
+	mux.HandleFunc("DELETE /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.DeleteOfficeBooking(officeBookingCollection)))
 
 	// Create server
 	srv := &http.Server{

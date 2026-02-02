@@ -24,6 +24,15 @@ A full-stack gym/wellness club CRM application with Go backend and React/Next.js
 │   ├── lib/
 │   ├── types/
 │   └── package.json
+├── mobile/               # React Native mobile app 📱 NEW
+│   ├── src/
+│   │   ├── api/         # Backend API integration
+│   │   ├── navigation/  # App navigation
+│   │   ├── screens/     # Mobile screens
+│   │   └── types/       # TypeScript types
+│   ├── ios/             # iOS native code
+│   ├── android/         # Android native code
+│   └── App.tsx
 └── README.md             # This file
 ```
 
@@ -57,6 +66,16 @@ A full-stack gym/wellness club CRM application with Go backend and React/Next.js
 - ✅ Same member management features as React
 - ✅ Modern component architecture
 - ✅ Better performance and DX
+
+**React Native (mobile/) - Mobile App** 📱 NEW
+- ✅ Cross-platform iOS & Android
+- ✅ Member authentication (Login/Register)
+- ✅ Class booking and management
+- ✅ Restaurant reservations
+- ✅ Profile management
+- ✅ Real-time updates
+- ✅ TypeScript + React Navigation
+- ✅ Native look and feel
 
 ## Member Management Features
 
@@ -143,6 +162,8 @@ In a new terminal:
 - **[Backend README](backend/README.md)** - Complete Go API documentation
 - **[React Frontend README](frontend/README.md)** - Original React app
 - **[Next.js Frontend README](frontend-nextjs/README.md)** - Modern Next.js app ⭐
+- **[Mobile App Guide](MOBILE.md)** - React Native mobile app setup 📱 NEW
+- **[Mobile Development Guide](mobile/MOBILE_GUIDE.md)** - Complete mobile dev docs 📱
 - **[OAuth Setup Guide](backend/OAUTH.md)** - How to configure Google/GitHub OAuth
 - **[API Security](backend/API_SECURITY.md)** - Authentication requirements and endpoints
 - **[Testing Guide](backend/TESTING.md)** - How to run backend tests

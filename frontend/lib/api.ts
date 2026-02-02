@@ -249,3 +249,140 @@ export const deleteClub = async (id: string) => {
     method: 'DELETE',
   });
 };
+
+// Restaurant APIs
+export const getRestaurants = async () => {
+  return authenticatedFetch(`${API_BASE_URL}/api/restaurants`);
+};
+
+export const getRestaurant = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/restaurants/${id}`);
+};
+
+export const createRestaurant = async (restaurantData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/restaurants`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(restaurantData),
+  });
+};
+
+export const updateRestaurant = async (id: string, restaurantData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/restaurants/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(restaurantData),
+  });
+};
+
+export const deleteRestaurant = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/restaurants/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// Reservation APIs
+export const getReservations = async (restaurantId?: string) => {
+  const url = restaurantId 
+    ? `${API_BASE_URL}/api/reservations?restaurant_id=${restaurantId}`
+    : `${API_BASE_URL}/api/reservations`;
+  return authenticatedFetch(url);
+};
+
+export const getReservation = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/reservations/${id}`);
+};
+
+export const createReservation = async (reservationData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/reservations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reservationData),
+  });
+};
+
+export const updateReservation = async (id: string, reservationData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/reservations/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reservationData),
+  });
+};
+
+export const deleteReservation = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/reservations/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// Office APIs
+export const getOffices = async (clubId?: string) => {
+  const url = clubId 
+    ? `${API_BASE_URL}/api/offices?club_id=${clubId}`
+    : `${API_BASE_URL}/api/offices`;
+  return authenticatedFetch(url);
+};
+
+export const getOffice = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/offices/${id}`);
+};
+
+export const createOffice = async (officeData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/offices`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(officeData),
+  });
+};
+
+export const updateOffice = async (id: string, officeData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/offices/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(officeData),
+  });
+};
+
+export const deleteOffice = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/offices/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+// Office Booking APIs
+export const getOfficeBookings = async (officeId?: string, memberId?: string) => {
+  const params = new URLSearchParams();
+  if (officeId) params.append('office_id', officeId);
+  if (memberId) params.append('member_id', memberId);
+  
+  const url = params.toString() 
+    ? `${API_BASE_URL}/api/office-bookings?${params.toString()}`
+    : `${API_BASE_URL}/api/office-bookings`;
+  return authenticatedFetch(url);
+};
+
+export const getOfficeBooking = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/office-bookings/${id}`);
+};
+
+export const createOfficeBooking = async (bookingData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/office-bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingData),
+  });
+};
+
+export const updateOfficeBooking = async (id: string, bookingData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/office-bookings/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingData),
+  });
+};
+
+export const deleteOfficeBooking = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/office-bookings/${id}`, {
+    method: 'DELETE',
+  });
+};
