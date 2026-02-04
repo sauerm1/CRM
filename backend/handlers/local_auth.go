@@ -100,6 +100,8 @@ func (h *LocalAuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Name:      req.Name,
 		Provider:  "local",
 		Password:  string(hashedPassword),
+		Role:      "admin", // Default to admin for now, can be changed via user management
+		Active:    true,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

@@ -1,6 +1,42 @@
-# Quick Start Guide for Developers
+# 🏋️ Gym CRM - Quick Start Guide
 
-## First Time Setup
+## ⚡ ONE COMMAND STARTUP (Recommended)
+
+**Stop juggling terminals! Start everything with one command:**
+
+```bash
+./dev.sh
+```
+
+**What it does:**
+- ✅ Checks and starts MongoDB automatically
+- ✅ Stops any conflicting processes on ports 8080/3000
+- ✅ Creates `.env` with defaults if missing
+- ✅ Installs `node_modules` if needed
+- ✅ Fixes Next.js build issues (SWC, lightningcss)
+- ✅ Starts backend with health checks
+- ✅ Starts frontend with health checks
+- ✅ Logs everything to `logs/` directory
+
+**Other commands:**
+```bash
+./stop-dev.sh   # Stop all services
+./status.sh     # Check service status
+./logs.sh       # View logs (backend/frontend/all)
+```
+
+**URLs when running:**
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- Health: http://localhost:8080/health
+
+---
+
+## Manual Setup (Original Method)
+
+If you prefer manual control or the automated script doesn't work:
+
+### First Time Setup
 
 ### 1. Start MongoDB
 ```bash

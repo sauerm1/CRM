@@ -386,3 +386,41 @@ export const deleteOfficeBooking = async (id: string) => {
     method: 'DELETE',
   });
 };
+
+// User Management APIs
+export const getUsers = async (role?: string, clubId?: string) => {
+  const params = new URLSearchParams();
+  if (role) params.append('role', role);
+  if (clubId) params.append('club_id', clubId);
+  
+  const url = params.toString() 
+    ? `${API_BASE_URL}/api/users?${params.toString()}`
+    : `${API_BASE_URL}/api/users`;
+  return authenticatedFetch(url);
+};
+
+export const getUser = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/users/${id}`);
+};
+
+export const createUser = async (userData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+};
+
+export const updateUser = async (id: string, userData: any) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+};
+
+export const deleteUser = async (id: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: 'DELETE',
+  });
+};

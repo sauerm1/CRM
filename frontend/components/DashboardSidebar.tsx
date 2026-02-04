@@ -47,6 +47,11 @@ export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebar
       href: '/dashboard/offices',
       icon: '💼',
     },
+    {
+      name: 'Users',
+      href: '/dashboard/users',
+      icon: '🔐',
+    },
   ];
 
   const isActive = (href: string) => {

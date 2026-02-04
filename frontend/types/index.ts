@@ -45,6 +45,12 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  role?: string; // admin, all_services, restaurant, office, classes
+  assigned_club_ids?: string[];
+  active?: boolean;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Instructor {

@@ -8,15 +8,18 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID         primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Email      string             `json:"email" bson:"email"`
-	Name       string             `json:"name" bson:"name"`
-	Picture    string             `json:"picture,omitempty" bson:"picture,omitempty"`
-	Provider   string             `json:"provider" bson:"provider"` // google, github, local, etc.
-	ProviderID string             `json:"provider_id,omitempty" bson:"provider_id,omitempty"`
-	Password   string             `json:"-" bson:"password,omitempty"` // Only for local auth, never returned in JSON
-	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt  time.Time          `json:"updated_at" bson:"updated_at"`
+	ID               primitive.ObjectID   `json:"id" bson:"_id,omitempty"`
+	Email            string               `json:"email" bson:"email"`
+	Name             string               `json:"name" bson:"name"`
+	Picture          string               `json:"picture,omitempty" bson:"picture,omitempty"`
+	Provider         string               `json:"provider" bson:"provider"` // google, github, local, etc.
+	ProviderID       string               `json:"provider_id,omitempty" bson:"provider_id,omitempty"`
+	Password        string               `json:"-" bson:"password,omitempty"` // Only for local auth, never returned in JSON
+	Role            string               `json:"role" bson:"role"`                        // admin, all_services, restaurant, office, classes
+	AssignedClubIDs []primitive.ObjectID `json:"assigned_club_ids,omitempty" bson:"assigned_club_ids,omitempty"`
+	Active          bool                 `json:"active" bson:"active"`
+	CreatedAt        time.Time            `json:"created_at" bson:"created_at"`
+	UpdatedAt        time.Time            `json:"updated_at" bson:"updated_at"`
 }
 
 // Session represents a user session

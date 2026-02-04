@@ -58,6 +58,7 @@ func main() {
 	reservationCollection := db.Client.Database(db.DatabaseName).Collection("reservations")
 	officeCollection := db.Client.Database(db.DatabaseName).Collection("offices")
 	officeBookingCollection := db.Client.Database(db.DatabaseName).Collection("office_bookings")
+	userCollection := db.Client.Database(db.DatabaseName).Collection("users")
 
 	// Setup routes
 	mux := http.NewServeMux()
@@ -123,6 +124,13 @@ func main() {
 	mux.HandleFunc("GET /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.GetOfficeBooking(officeBookingCollection)))
 	mux.HandleFunc("PUT /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.UpdateOfficeBooking(officeBookingCollection)))
 	mux.HandleFunc("DELETE /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.DeleteOfficeBooking(officeBookingCollection)))
+
+	// User management routes - require authentication (admin only in the future)
+	mux.HandleFunc("GET /api/users", authMiddleware.RequireAuth(handlers.GetUsers(userCollection)))
+	mux.HandleFunc("POST /api/users", authMiddleware.RequireAuth(handlers.CreateUser(userCollection)))
+	mux.HandleFunc("GET /api/users/{id}", authMiddleware.RequireAuth(handlers.GetUser(userCollection)))
+	mux.HandleFunc("PUT /api/users/{id}", authMiddleware.RequireAuth(handlers.UpdateUser(userCollection)))
+	mux.HandleFunc("DELETE /api/users/{id}", authMiddleware.RequireAuth(handlers.DeleteUser(userCollection)))
 
 	// Create server
 	srv := &http.Server{

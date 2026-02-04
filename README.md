@@ -91,6 +91,35 @@ Both frontends provide:
 
 ## Quick Start
 
+### ⚡ ONE COMMAND (Recommended)
+
+```bash
+./dev.sh
+```
+
+**That's it!** This automatically:
+- ✅ Starts MongoDB (if not running)
+- ✅ Starts backend with health checks
+- ✅ Starts frontend with dependency management
+- ✅ Handles port conflicts
+- ✅ Creates `.env` with defaults
+- ✅ Logs everything to `logs/`
+
+**Other commands:**
+```bash
+./stop-dev.sh   # Stop all services
+./status.sh     # Check what's running
+./logs.sh       # View logs
+```
+
+See [SCRIPTS.md](SCRIPTS.md) for complete documentation.
+
+---
+
+### Manual Setup (Traditional)
+
+If you prefer manual control:
+
 ### Prerequisites
 - Go 1.21 or higher
 - Node.js 16+ and npm
