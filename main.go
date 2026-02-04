@@ -8,10 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"go-api-mongo/config"
 	"go-api-mongo/database"
 	"go-api-mongo/handlers"
-	"go-api-mongo/middleware"
 )
 
 func main() {
@@ -22,35 +20,14 @@ func main() {
 	}
 	defer db.Disconnect()
 
-	// Initialize OAuth and session configuration
-	oauthConfig := config.InitOAuthConfig()
-	sessionConfig := config.InitSessionConfig()
-
 	// Initialize handlers with database
 	h := handlers.NewHandler(db)
-	oauthHandler := handlers.NewOAuthHandler(db.Client.Database(db.DatabaseName), oauthConfig, sessionConfig)
-	localAuthHandler := handlers.NewLocalAuthHandler(db.Client.Database(db.DatabaseName), sessionConfig)
-	authMiddleware := middleware.NewAuthMiddleware(db.Client.Database(db.DatabaseName), sessionConfig)
 
 	// Setup routes
 	mux := http.NewServeMux()
-
-	// Public routes
+	mux.HandleFunc("/api/items", h.ItemsHandler)
+	mux.HandleFunc("/api/items/", h.ItemHandler)
 	mux.HandleFunc("/health", h.HealthHandler)
-
-	// Local authentication routes
-	mux.HandleFunc("/auth/register", localAuthHandler.Register)
-	mux.HandleFunc("/auth/login", localAuthHandler.Login)
-
-	// OAuth routes
-	mux.HandleFunc("/auth/google", oauthHandler.GoogleLogin)
-	mux.HandleFunc("/auth/github", oauthHandler.GitHubLogin)
-	mux.HandleFunc("/auth/callback/google", oauthHandler.GoogleCallback)
-	mux.HandleFunc("/auth/callback/github", oauthHandler.GitHubCallback)
-	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
-
-	// Protected routes - require authentication
-	mux.HandleFunc("/api/me", authMiddleware.RequireAuth(oauthHandler.Me))
 
 	// Create server
 	srv := &http.Server{

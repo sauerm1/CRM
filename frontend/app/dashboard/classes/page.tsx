@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getClasses, deleteClass } from '@/lib/api';
-import type { Class } from '@/types';
+import { getClasses, deleteClass, getInstructors } from '@/lib/api';
+import type { Class, Instructor } from '@/types';
 
 export default function ClassesPage() {
   const router = useRouter();
   const [classes, setClasses] = useState<Class[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'instructor' | 'status'>('date');
@@ -25,13 +26,22 @@ export default function ClassesPage() {
 
   const loadClasses = async () => {
     try {
-      const data = await getClasses();
-      setClasses(data || []);
+      const [classesData, instructorsData] = await Promise.all([
+        getClasses(),
+        getInstructors()
+      ]);
+      setClasses(classesData || []);
+      setInstructors(instructorsData || []);
     } catch (error) {
       console.error('Failed to load classes:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getInstructorName = (instructorId: string) => {
+    const instructor = instructors.find(i => i.id === instructorId);
+    return instructor ? instructor.name : instructorId;
   };
 
   const handleDelete = async (id: string) => {
@@ -88,7 +98,7 @@ export default function ClassesPage() {
       alert('Failed to delete some classes: ' + error.message);
     } finally {
       setDeleting(false);
-    }
+    }getInstructorName(cls.instructor)
   };
 
   const getFilteredClasses = () => {
@@ -125,7 +135,6 @@ export default function ClassesPage() {
   const getSortedClasses = (classesToSort: Class[]) => {
     return [...classesToSort].sort((a, b) => {
       let comparison = 0;
-      
       switch (sortBy) {
         case 'date':
           comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -134,7 +143,7 @@ export default function ClassesPage() {
           comparison = (a.name || '').localeCompare(b.name || '');
           break;
         case 'instructor':
-          comparison = (a.instructor || '').localeCompare(b.instructor || '');
+          comparison = getInstructorName(a.instructor).localeCompare(getInstructorName(b.instructor));
           break;
         case 'status':
           comparison = (a.status || '').localeCompare(b.status || '');
@@ -159,7 +168,12 @@ export default function ClassesPage() {
     return <span className="text-green-600 ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>;
   };
 
-  const uniqueInstructors = Array.from(new Set(classes.map(c => c.instructor).filter(Boolean)));
+  const uniqueInstructors = Array.from(
+    new Set(classes.map(c => c.instructor).filter(Boolean))
+  ).map(id => ({
+    id,
+    name: getInstructorName(id)
+  }));
   const uniqueDates = Array.from(new Set(classes.map(c => c.date).filter(Boolean))).sort();
   const uniqueDurations = Array.from(new Set(classes.map(c => c.duration).filter(Boolean))).sort((a, b) => a - b);
 
@@ -295,7 +309,7 @@ export default function ClassesPage() {
                 >
                   <option value="">All Instructors</option>
                   {uniqueInstructors.map(instructor => (
-                    <option key={instructor} value={instructor}>{instructor}</option>
+                    <option key={instructor.id} value={instructor.id}>{instructor.name}</option>
                   ))}
                 </select>
               </div>
@@ -420,7 +434,7 @@ export default function ClassesPage() {
                           {cls.recurring && <div className="text-xs text-blue-600">🔄 Recurring</div>}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap" onClick={() => router.push(`/dashboard/classes/${cls.id}`)}>
-                          <div className="text-sm text-gray-600">{cls.instructor}</div>
+                          <div className="text-sm text-gray-600">{getInstructorName(cls.instructor)}</div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap" onClick={() => router.push(`/dashboard/classes/${cls.id}`)}>
                           <div className="text-sm text-gray-600">{formatDate(cls.date)}</div>

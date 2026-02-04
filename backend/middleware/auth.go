@@ -54,7 +54,7 @@ func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		if session.ExpiresAt.Before(time.Now()) {
 			// Delete expired session
 			sessionsCollection.DeleteOne(ctx, bson.M{"_id": session.ID})
-			
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{"error": "Session expired"})
@@ -77,6 +77,7 @@ func (m *AuthMiddleware) RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
+
 // OptionalAuth is a middleware that optionally authenticates the user
 func (m *AuthMiddleware) OptionalAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

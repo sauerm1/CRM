@@ -1,113 +1,186 @@
 # Gym CRM Mobile App
 
-React Native mobile application for gym members.
+Expo-based React Native mobile application for gym members.
 
 ## Features
 
-- Member login and registration
-- View class schedules and book classes
-- View and manage reservations
-- Restaurant reservations
-- Profile management
-- Real-time updates
+- **Authentication**: Login and Register with email/password
+- **Dashboard**: Member stats and upcoming classes
+- **Classes**: Browse and book fitness classes
+- **Restaurants**: View and make restaurant reservations
+- **Profile**: View and manage user profile
+- **Automatic Token Refresh**: Seamless re-authentication
+
+## Tech Stack
+
+- **Expo SDK 52**: Modern React Native development
+- **TypeScript**: Full type safety
+- **Expo Router**: File-based navigation
+- **Axios**: HTTP client with interceptors
+- **AsyncStorage**: Secure token storage
 
 ## Prerequisites
 
-- Node.js >= 20.19.4
-- npm or yarn
-- iOS: Xcode and CocoaPods (for iOS development)
-- Android: Android Studio and Android SDK (for Android development)
+- Node.js 18+
+- Expo CLI
+- iOS Simulator (macOS) or Android Emulator
+- Backend server running on http://localhost:8080
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Installation
 
-## Step 1: Start Metro
-
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+```bash
+cd mobile
+npm install
 ```
 
-## Step 2: Build and run your app
+## Running the App
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Start Development Server
 
-### Android
+```bash
+npm start
+```
 
-```sh
-# Using npm
+Then press:
+- `i` for iOS simulator
+- `a` for Android emulator
+- `w` for web browser
+
+### Or run directly:
+
+```bash
+# iOS
+npm run ios
+
+# Android
 npm run android
 
-# OR using Yarn
-yarn android
+# Web
+npm run web
 ```
+
+## Project Structure
+
+```
+mobile/
+├── app/
+│   ├── (auth)/           # Authentication screens
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── (tabs)/           # Main app tabs
+│   │   ├── index.tsx     # Home/Dashboard
+│   │   ├── classes.tsx   # Classes list
+│   │   ├── restaurants.tsx
+│   │   └── profile.tsx
+│   └── _layout.tsx       # Root layout
+├── services/
+│   └── api.ts            # API client with auto-refresh
+├── types/
+│   └── index.ts          # TypeScript definitions
+├── constants/
+│   └── config.ts         # App configuration
+└── components/           # Reusable components
+```
+
+## Configuration
+
+The app connects to the backend API. Edit `constants/config.ts` to change the API URL:
+
+```typescript
+export const API_BASE_URL = __DEV__
+  ? Platform.OS === 'ios'
+    ? 'http://localhost:8080'
+    : 'http://10.0.2.2:8080'
+  : 'https://your-production-api.com';
+```
+
+## Features
+
+### Authentication
+- Email/password login
+- User registration
+- Automatic token refresh (1-hour access tokens, 7-day refresh tokens)
+- Secure token storage with AsyncStorage
+
+### Dashboard
+- Welcome message with user name
+- Member statistics (total, active)
+- Class count
+- Upcoming classes preview
+
+### Classes
+- Browse all fitness classes
+- View instructor, schedule, capacity
+- Class booking functionality
+
+### Restaurants
+- Browse on-site restaurants
+- View cuisine type, hours, contact info
+- Make reservations
+
+### Profile
+- View account information
+- Settings menu
+- Logout functionality
+
+## Development
+
+### Clear Cache
+
+```bash
+npm start -- --clear
+```
+
+### Type Check
+
+```bash
+npx tsc --noEmit
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+## Building for Production
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+eas build --platform ios
 ```
 
-Then, and every time you update your native dependencies, run:
+### Android
 
-```sh
-bundle exec pod install
+```bash
+eas build --platform android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## Troubleshooting
 
-```sh
-# Using npm
-npm run ios
+### Cannot connect to backend
 
-# OR using Yarn
-yarn ios
+- **iOS Simulator**: Use `http://localhost:8080`
+- **Android Emulator**: Use `http://10.0.2.2:8080`
+- **Physical Device**: Use your computer's IP address (e.g., `http://192.168.1.100:8080`)
+
+### Metro bundler issues
+
+```bash
+npm start -- --reset-cache
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Dependency issues
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```bash
+rm -rf node_modules
+npm install
+```
 
-## Step 3: Modify your app
+## Notes
 
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- This is an Expo-managed app (no native code directories needed)
+- Uses Expo Router for file-based navigation
+- All screens are TypeScript for type safety
+- API service handles token refresh automatically

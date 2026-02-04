@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUser, updateUser, getClubs } from '@/lib/api';
 import { User, Club } from '@/types';
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,12 +22,12 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [resolvedParams.id]);
 
   const fetchData = async () => {
     try {
       const [userData, clubsData] = await Promise.all([
-        getUser(params.id),
+        getUser(resolvedParams.id),
         getClubs()
       ]);
       
@@ -65,7 +66,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
         updateData.password = formData.password;
       }
 
-      await updateUser(params.id, updateData);
+      await updateUser(resolvedParams.id, updateData);
       alert('User updated successfully!');
       router.push('/dashboard/users');
     } catch (error: any) {

@@ -1,19 +1,27 @@
-# Go REST API with MongoDB and OAuth
+# Go REST API with MongoDB - Multi-Club Gym CRM
 
-A simple REST API built with Go that receives API calls, stores data in MongoDB, and includes OAuth 2.0 authentication.
+A comprehensive REST API built with Go for managing multi-location gym/wellness clubs, featuring member management, instructor assignments, class scheduling, and more.
 
 ## Features
 
-- RESTful API endpoints for CRUD operations
-- MongoDB integration for data persistence
+- **RESTful API** endpoints for all entities (CRUD operations)
+- **Multi-Club Support**: Manage multiple gym locations
+- **Member Management**: Complete member lifecycle tracking with club assignment
+- **Instructor Management**: Assign instructors to multiple clubs
+- **Class Scheduling**: Create and manage fitness classes
+- **Restaurant Management**: On-site dining facilities
+- **Office Management**: Co-working space bookings
+- **User Management**: Staff/admin account system
 - **Multiple authentication methods:**
   - Local authentication (email/password with bcrypt)
   - OAuth 2.0 (Google and GitHub)
+  - Refresh token system (1-hour access, 7-day refresh)
 - **Session management with secure cookies**
-- **Protected and public routes**
+- **Protected and public routes** with middleware
 - Graceful server shutdown
 - Health check endpoint
 - Environment variable configuration
+- Database seeding scripts for development
 
 ## Prerequisites
 
@@ -68,15 +76,23 @@ The server will start on `http://localhost:8080`
 For development, you can populate the database with sample data:
 
 ```bash
-make seed
+cd scripts
+./seed.sh
+```
+
+Or run directly with Go:
+```bash
+cd scripts
+go run seed_database.go
 ```
 
 This will create:
-- 5 gym clubs with locations
-- 15 instructors with various specialties
-- 100 members with realistic membership data
+- 5 gym clubs with full addresses and contact info
+- 15 instructors with various specialties (assigned to multiple clubs)
+- 100 members with realistic membership data (assigned to clubs)
+- Sample classes linked to instructors and clubs
 
-⚠️ **Note:** The seed script clears existing data before inserting sample data.
+⚠️ **Note:** The seed script **clears existing data** before inserting sample data. Do not run in production!
 
 See [scripts/README.md](scripts/README.md) for more details.
 
@@ -114,31 +130,187 @@ Content-Type: application/json
 }
 ```
 
-Example with curl:
+Returns access token and refresh token.
+
+#### Refresh Token
 ```bash
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"securepass123"}' \
-  -c cookies.txt
+POST /auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "your-refresh-token-here"
+}
 ```
+
+Returns new access token. Access tokens expire after 1 hour, refresh tokens after 7 days.
 
 #### OAuth Login
 - `GET /auth/google` - Login with Google
 - `GET /auth/github` - Login with GitHub
+- `GET /auth/callback/google` - Google OAuth callback
+- `GET /auth/callback/github` - GitHub OAuth callback
 
 #### Get Current User
 ```bash
 GET /api/me
-```
-
-Example with curl (using saved cookies from login):
-```bash
-curl http://localhost:8080/api/me -b cookies.txt
+Authorization: Bearer <access-token>
 ```
 
 #### Logout
 ```bash
-GET /auth/logout
+POST /auth/logout
+Authorization: Bearer <access-token>
+```
+
+### Member Endpoints
+
+All member endpoints require authentication.
+
+```bash
+# Get all members
+GET /api/members
+
+# Get single member
+GET /api/members/{id}
+
+# Create member
+POST /api/members
+Content-Type: application/json
+{
+  "club_id": "club-id-here",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@example.com",
+  "phone": "555-1234",
+  "membership_type": "Premium",
+  "status": "active",
+  "auto_renewal": true,
+  "emergency_contact": "Jane Doe - 555-5678"
+}
+
+# Update member
+PUT /api/members/{id}
+Content-Type: application/json
+{ ... same as create ... }
+
+# Delete member
+DELETE /api/members/{id}
+```
+
+### Club Endpoints
+
+```bash
+# Get all clubs
+GET /api/clubs
+
+# Get single club
+GET /api/clubs/{id}
+
+# Create club
+POST /api/clubs
+Content-Type: application/json
+{
+  "name": "Downtown Fitness",
+  "address": "123 Main St",
+  "city": "New York",
+  "state": "NY",
+  "zip_code": "10001",
+  "phone": "555-1234",
+  "email": "downtown@gymcrm.com",
+  "active": true
+}
+
+# Update club
+PUT /api/clubs/{id}
+
+# Delete club
+DELETE /api/clubs/{id}
+```
+
+### Instructor Endpoints
+
+```bash
+# Get all instructors
+GET /api/instructors
+
+# Get single instructor
+GET /api/instructors/{id}
+
+# Create instructor with multi-club assignment
+POST /api/instructors
+Content-Type: application/json
+{
+  "name": "Sarah Smith",
+  "email": "sarah@example.com",
+  "phone": "555-1234",
+  "specialty": "Yoga",
+  "bio": "Certified yoga instructor with 10 years experience",
+  "active": true,
+  "club_ids": ["club-id-1", "club-id-2"]  // Array of club IDs
+}
+
+# Update instructor
+PUT /api/instructors/{id}
+
+# Delete instructor
+DELETE /api/instructors/{id}
+```
+
+### Class Endpoints
+
+```bash
+# Get all classes
+GET /api/classes
+
+# Get single class
+GET /api/classes/{id}
+
+# Create class
+POST /api/classes
+Content-Type: application/json
+{
+  "name": "Morning Yoga",
+  "instructor_id": "instructor-id-here",
+  "club_id": "club-id-here",
+  "schedule": "Mon/Wed/Fri 9:00 AM",
+  "capacity": 20
+}
+
+# Update class
+PUT /api/classes/{id}
+
+# Delete class
+DELETE /api/classes/{id}
+```
+
+### Restaurant Endpoints
+
+```bash
+GET /api/restaurants
+POST /api/restaurants
+GET /api/restaurants/{id}
+PUT /api/restaurants/{id}
+DELETE /api/restaurants/{id}
+```
+
+### Office Endpoints
+
+```bash
+GET /api/offices
+POST /api/offices
+GET /api/offices/{id}
+PUT /api/offices/{id}
+DELETE /api/offices/{id}
+```
+
+### User Endpoints
+
+```bash
+GET /api/users
+POST /api/users
+GET /api/users/{id}
+PUT /api/users/{id}
+DELETE /api/users/{id}
 ```
 
 ### Health Check
@@ -146,19 +318,43 @@ GET /auth/logout
 GET /health
 ```
 
+Public endpoint, returns server status.
+
 ## Project Structure
 
 ```
-.
-├── main.go              # Application entry point and server setup
+backend/
+├── main.go                   # Application entry point and server setup
 ├── database/
-│   └── database.go      # MongoDB connection and configuration
+│   └── database.go           # MongoDB connection and configuration
 ├── handlers/
-│   └── handlers.go      # HTTP request handlers
+│   ├── local_auth.go         # Email/password authentication
+│   ├── oauth.go              # Google/GitHub OAuth handlers
+│   ├── member_handlers.go    # Member CRUD operations
+│   ├── club_handlers.go      # Club management
+│   ├── instructor_handlers.go # Instructor management (multi-club)
+│   ├── class_handlers.go     # Class scheduling
+│   ├── restaurant_handlers.go # Restaurant management
+│   ├── office_handlers.go    # Office management
+│   └── user_handlers.go      # User account management
 ├── models/
-│   └── item.go          # Data models
-├── go.mod               # Go module dependencies
-└── README.md            # This file
+│   ├── user.go               # Staff/admin user model
+│   ├── member.go             # Gym member model
+│   ├── club.go               # Club location model
+│   ├── instructor.go         # Instructor model (with club_ids array)
+│   ├── class.go              # Fitness class model
+│   ├── restaurant.go         # Restaurant model
+│   └── office.go             # Office model
+├── middleware/
+│   └── auth.go               # Authentication middleware
+├── scripts/
+│   ├── seed_database.go      # Database seeding script
+│   ├── seed.sh               # Shell wrapper for seeding
+│   └── README.md             # Scripts documentation
+├── go.mod                    # Go module dependencies
+├── go.sum                    # Dependency checksums
+├── .env.example              # Example environment variables
+└── README.md                 # This file
 ```
 
 ## Testing with curl
@@ -170,32 +366,66 @@ Here's a complete workflow to test the API:
 curl http://localhost:8080/health
 ```
 
-2. Register or login to get a session:
+2. Register a new user:
 ```bash
-# Register
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"securepass123","name":"Test User"}' \
-  -c cookies.txt
+  -d '{"email":"admin@example.com","password":"securepass123","name":"Admin User"}'
+```
 
-# OR Login if already registered
+3. Login to get access token:
+```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"securepass123"}' \
-  -c cookies.txt
+  -d '{"email":"admin@example.com","password":"securepass123"}'
 ```
 
-3. Get all members (requires authentication):
+Save the `access_token` and `refresh_token` from the response.
+
+4. Use the access token for authenticated requests:
 ```bash
-curl http://localhost:8080/api/members -b cookies.txt
+# Get all clubs
+curl http://localhost:8080/api/clubs \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get all members
+curl http://localhost:8080/api/members \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get all instructors
+curl http://localhost:8080/api/instructors \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-4. Get all classes (requires authentication):
+5. Create a new club:
 ```bash
-curl http://localhost:8080/api/classes -b cookies.txt
+curl -X POST http://localhost:8080/api/clubs \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Downtown Fitness",
+    "address": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zip_code": "10001",
+    "phone": "555-1234",
+    "email": "downtown@gymcrm.com",
+    "active": true
+  }'
 ```
 
-**Note:** All `/api/*` endpoints require authentication. Without a valid session cookie, you'll receive a `401 Unauthorized` response.
+6. Refresh token when access token expires:
+```bash
+curl -X POST http://localhost:8080/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refresh_token":"YOUR_REFRESH_TOKEN"}'
+```
+
+**Note:** 
+- All `/api/*` endpoints require authentication via Bearer token
+- Access tokens expire after 1 hour
+- Refresh tokens expire after 7 days
+- Without a valid token, you'll receive a `401 Unauthorized` response
 
 ## Testing
 

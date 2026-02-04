@@ -1,6 +1,6 @@
-# Gym CRM - Member Management System
+# Gym CRM - Multi-Club Management System
 
-A full-stack gym/wellness club CRM application with Go backend and React/Next.js frontend options, featuring OAuth 2.0 and local authentication.
+A comprehensive full-stack gym/wellness club CRM application with Go backend and Next.js frontend, featuring OAuth 2.0 authentication, multi-club support, instructor management, class scheduling, and mobile app.
 
 ## Project Structure
 
@@ -8,23 +8,41 @@ A full-stack gym/wellness club CRM application with Go backend and React/Next.js
 ├── backend/              # Go REST API with MongoDB
 │   ├── main.go
 │   ├── handlers/
-│   │   ├── oauth.go     # Authentication handlers
-│   │   └── customers.go # Member CRUD handlers
+│   │   ├── local_auth.go      # Email/password authentication
+│   │   ├── oauth.go           # OAuth handlers (Google/GitHub)
+│   │   ├── member_handlers.go # Member CRUD
+│   │   ├── club_handlers.go   # Multi-club management
+│   │   ├── instructor_handlers.go  # Instructor management
+│   │   ├── class_handlers.go  # Class scheduling
+│   │   ├── restaurant_handlers.go  # Restaurant management
+│   │   └── office_handlers.go # Office/co-working space management
 │   ├── models/
-│   │   └── item.go      # Member data model
+│   │   ├── user.go           # User/staff accounts
+│   │   ├── member.go         # Gym members
+│   │   ├── club.go           # Club locations
+│   │   ├── instructor.go     # Instructors (multi-club support)
+│   │   ├── class.go          # Fitness classes
+│   │   ├── restaurant.go     # On-site restaurants
+│   │   └── office.go         # Co-working spaces
 │   ├── database/
-│   ├── config/
-│   └── middleware/
-├── frontend/             # React web application (original)
-│   ├── src/
-│   ├── public/
-│   └── package.json
-├── frontend-nextjs/      # Next.js application (modern)
+│   ├── middleware/
+│   └── scripts/          # Database seeding scripts
+├── frontend/             # Next.js TypeScript application ⭐ Primary UI
 │   ├── app/
+│   │   ├── dashboard/    # Main dashboard
+│   │   │   ├── members/  # Member management
+│   │   │   ├── clubs/    # Club locations
+│   │   │   ├── instructors/  # Instructor management
+│   │   │   ├── classes/  # Class scheduling
+│   │   │   ├── restaurants/  # Restaurant management
+│   │   │   ├── offices/  # Office management
+│   │   │   └── users/    # User management
+│   │   ├── login/
+│   │   └── register/
 │   ├── lib/
-│   ├── types/
-│   └── package.json
-├── mobile/               # React Native mobile app 📱 NEW
+│   │   └── api.ts        # API client with auto-refresh tokens
+│   └── types/
+├── mobile/               # React Native mobile app 📱
 │   ├── src/
 │   │   ├── api/         # Backend API integration
 │   │   ├── navigation/  # App navigation
@@ -39,35 +57,52 @@ A full-stack gym/wellness club CRM application with Go backend and React/Next.js
 ## Features
 
 ### Backend (Go + MongoDB)
-- ✅ RESTful API for member management (CRUD operations)
+- ✅ RESTful API with full CRUD operations for all entities
+- ✅ **Multi-Club Support**: Manage multiple gym locations
+- ✅ **Member Management**: Complete member lifecycle tracking
+- ✅ **Instructor Management**: Assign instructors to multiple clubs
+- ✅ **Class Scheduling**: Create and manage fitness classes
+- ✅ **Restaurant Management**: On-site dining facilities
+- ✅ **Office/Co-working Spaces**: Manage bookable office spaces
 - ✅ Multiple authentication methods:
   - Email/Password with bcrypt hashing
   - Google OAuth 2.0
   - GitHub OAuth 2.0
+- ✅ **Refresh Token System**: 1-hour access tokens, 7-day refresh tokens with automatic renewal
 - ✅ Session management with MongoDB
-- ✅ Protected API endpoints
+- ✅ Protected API endpoints with middleware
 - ✅ Optimized MongoDB connection (5s timeouts, pool size 10-50)
 - ✅ CORS support for frontend integration
 
-### Frontend Options
+### Frontend (Next.js TypeScript) ⭐ Primary Application
+- ✅ **TypeScript**: Full type safety across the application
+- ✅ **Tailwind CSS**: Modern, responsive design
+- ✅ **Next.js 16 App Router**: Latest routing paradigm
+- ✅ **Dashboard Analytics**: Member count, active classes, club stats with charts
+- ✅ **Multi-Club Management**: 
+  - Create, edit, delete club locations
+  - View instructors assigned to each club
+  - Club-specific filtering (planned)
+- ✅ **Member Management**:
+  - Full CRUD operations
+  - Club assignment
+  - Auto-renewal toggle
+  - Status badges (Active, Inactive, Suspended)
+  - Emergency contact tracking
+- ✅ **Instructor Management**:
+  - Multi-club assignment via checkboxes
+  - Specialty and bio fields
+  - Active/inactive status
+  - View instructors by club
+- ✅ **Class Management**: Schedule and manage fitness classes
+- ✅ **Restaurant Management**: Manage on-site dining facilities
+- ✅ **Office Management**: Co-working space bookings
+- ✅ **User Management**: Staff/admin account management
+- ✅ **Automatic Token Refresh**: Seamless re-authentication without logout
+- ✅ **Search & Filter**: Quick lookup across all entities
+- ✅ **Responsive Design**: Works on desktop, tablet, and mobile browsers
 
-**React (frontend/) - Original**
-- ✅ Login/Register with email/password
-- ✅ OAuth login buttons (Google & GitHub)
-- ✅ Member management dashboard (CRUD)
-- ✅ Auto-renewal feature for memberships
-- ✅ Default date handling (today, +1 year)
-- ✅ Responsive design with custom CSS
-
-**Next.js (frontend-nextjs/) - Modern** ⭐ Recommended
-- ✅ TypeScript for type safety
-- ✅ Tailwind CSS for styling
-- ✅ Next.js App Router
-- ✅ Same member management features as React
-- ✅ Modern component architecture
-- ✅ Better performance and DX
-
-**React Native (mobile/) - Mobile App** 📱 NEW
+### Mobile App (React Native) 📱
 - ✅ Cross-platform iOS & Android
 - ✅ Member authentication (Login/Register)
 - ✅ Class booking and management
@@ -77,17 +112,47 @@ A full-stack gym/wellness club CRM application with Go backend and React/Next.js
 - ✅ TypeScript + React Navigation
 - ✅ Native look and feel
 
-## Member Management Features
+## Key Features by Entity
 
-Both frontends provide:
-- **Add/Edit Members** - Personal info, membership details, emergency contacts
-- **Member Types** - Basic, Premium, VIP, Student, Senior
-- **Status Management** - Active, Inactive, Suspended with visual badges
-- **Auto-renewal** - Toggle automatic membership renewal
-- **Default Dates** - Join date defaults to today, expiry to one year from now
-- **Emergency Contacts** - Required contact information for safety
-- **Notes** - Optional notes for each member
-- **Search & Filter** - Easy member lookup
+### Clubs (Multi-Location Support)
+- Create and manage multiple gym locations
+- Track name, address, city, state, zip code
+- Contact information (phone, email)
+- Active/inactive status
+- View all instructors assigned to each club
+- Club-specific member and class filtering (planned)
+
+### Members
+- Personal info: First name, last name, email, phone
+- Membership types: Basic, Premium, VIP, Student, Senior
+- Status: Active, Inactive, Suspended
+- Join date and expiry date with auto-calculated defaults
+- Auto-renewal toggle
+- Emergency contact (required)
+- Club assignment
+- Notes field for additional information
+
+### Instructors
+- **Multi-club assignment**: Instructors can work at multiple locations
+- Name, email, phone
+- Specialty (Yoga, Pilates, CrossFit, etc.)
+- Bio/description
+- Active/inactive status
+- View which clubs an instructor is assigned to
+- Checkbox selection UI for club assignment
+
+### Classes
+- Class scheduling and management
+- Instructor assignment
+- Club location assignment
+- Capacity tracking
+
+### Authentication & Security
+- **Refresh token flow**: Short-lived access tokens (1 hour) with long-lived refresh tokens (7 days)
+- **Automatic token renewal**: Frontend automatically refreshes expired tokens
+- **Multiple login methods**: Email/password, Google OAuth, GitHub OAuth
+- **Session management**: Secure cookie-based sessions
+- **Protected routes**: All API endpoints require authentication except login/register
 
 ## Quick Start
 
@@ -164,38 +229,72 @@ go run main.go
 
 The API will start on `http://localhost:8080`
 
-### 3a. Setup Frontend (React - Original)
+### 3. Setup Frontend (Next.js) ⭐ Primary Application
 
 In a new terminal:
 
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 The frontend will start on `http://localhost:3000`
 
-### 3b. Setup Frontend (Next.js - Modern) ⭐ Recommended
+### 4. Setup Mobile App (Optional) 📱
 
-In a new terminal:
- (gym staff/admin)
-- Login with email/password
-- Login with Google or GitHub (if configured)
-- Manage gym members (create, view, edit, delete)
-- Set membership types and auto-renewal options
-- Track membership expiry dates
+For iOS (macOS required):
+```bash
+cd mobile
+npm install
+cd ios && bundle exec pod install && cd ..
+npm run ios
+```
+
+For Android:
+```bash
+cd mobile
+npm install
+npm run android
+```
+
+See [MOBILE.md](MOBILE.md) for detailed mobile setup instructions.
+
+## First Time Setup
+
+1. **Register an account**: Navigate to http://localhost:3000, click "Register"
+2. **Create a club**: Go to Dashboard → Clubs → Add New Club
+3. **Add instructors**: Dashboard → Instructors → Add Instructor (assign to one or more clubs)
+4. **Add members**: Dashboard → Members → Add Member (assign to a club)
+5. **Schedule classes**: Dashboard → Classes → Add Class
+
+## Usage Guide
+
+### For Gym Staff/Administrators
+- Login with email/password or OAuth
+- Access the dashboard to view overview stats
+- Manage members, instructors, classes across all club locations
+- View club-specific information
+- Track membership renewals and status
+
+### For Mobile App Users (Members)
+- Login with member credentials
+- Browse available classes
+- Make restaurant reservations
+- View and update profile
+- Book classes at any club location
 
 ## Documentation
 
-- **[Backend README](backend/README.md)** - Complete Go API documentation
-- **[React Frontend README](frontend/README.md)** - Original React app
-- **[Next.js Frontend README](frontend-nextjs/README.md)** - Modern Next.js app ⭐
-- **[Mobile App Guide](MOBILE.md)** - React Native mobile app setup 📱 NEW
-- **[Mobile Development Guide](mobile/MOBILE_GUIDE.md)** - Complete mobile dev docs 📱
-- **[OAuth Setup Guide](backend/OAUTH.md)** - How to configure Google/GitHub OAuth
-- **[API Security](backend/API_SECURITY.md)** - Authentication requirements and endpoints
-- **[Testing Guide](backend/TESTING.md)** - How to run backend tests
+- **[Backend README](backend/README.md)** - Complete Go API documentation and endpoints
+- **[Frontend README](frontend/README.md)** - Next.js application guide
+- **[Mobile App Guide](MOBILE.md)** - React Native mobile app quick start 📱
+- **[Mobile Development Guide](mobile/MOBILE_GUIDE.md)** - Complete mobile development docs 📱
+- **[OAuth Setup Guide](backend/OAUTH.md)** - Configure Google/GitHub OAuth
+- **[API Security](backend/API_SECURITY.md)** - Authentication requirements and security
+- **[Testing Guide](backend/TESTING.md)** - Backend testing instructions
+- **[Scripts Documentation](SCRIPTS.md)** - Development scripts and automation
+- **[Role System](ROLE_SYSTEM.md)** - User roles and permissions (planned)
 
 ## API Overview
 
@@ -205,23 +304,62 @@ In a new terminal:
 - `POST /auth/login` - Login with email/password
 - `GET /auth/google` - Initiate Google OAuth
 - `GET /auth/github` - Initiate GitHub OAuth
+- `POST /auth/refresh` - Refresh access token using refresh token
 
 ### Protected Endpoints (Auth Required)
-- `GET /api/me` - Get current user
+
+#### User/Auth
+- `GET /api/me` - Get current authenticated user
+- `POST /auth/logout` - Logout and invalidate session
+
+#### Members
 - `GET /api/members` - List all members
-- `POST /api/members` - Create member
+- `POST /api/members` - Create new member
 - `GET /api/members/{id}` - Get member by ID
 - `PUT /api/members/{id}` - Update member
 - `DELETE /api/members/{id}` - Delete member
-- `POST /auth/logout` - Logout (also accepts GET)ister with email/password
-- `POST /auth/login` - Login with email/password
-- `GET /auth/google` - Initiate Google OAuth
-- `GET /auth/github` - Initiate GitHub OAuth
 
-### Protected Endpoints (Auth Required)
-- `GET /api/me` - Get current user
-- Items endpoints removed (legacy bootstrap code)
-- `GET /auth/logout` - Logout
+#### Clubs
+- `GET /api/clubs` - List all clubs
+- `POST /api/clubs` - Create new club
+- `GET /api/clubs/{id}` - Get club by ID
+- `PUT /api/clubs/{id}` - Update club
+- `DELETE /api/clubs/{id}` - Delete club
+
+#### Instructors
+- `GET /api/instructors` - List all instructors
+- `POST /api/instructors` - Create new instructor
+- `GET /api/instructors/{id}` - Get instructor by ID
+- `PUT /api/instructors/{id}` - Update instructor (including club assignments)
+- `DELETE /api/instructors/{id}` - Delete instructor
+
+#### Classes
+- `GET /api/classes` - List all classes
+- `POST /api/classes` - Create new class
+- `GET /api/classes/{id}` - Get class by ID
+- `PUT /api/classes/{id}` - Update class
+- `DELETE /api/classes/{id}` - Delete class
+
+#### Restaurants
+- `GET /api/restaurants` - List all restaurants
+- `POST /api/restaurants` - Create new restaurant
+- `GET /api/restaurants/{id}` - Get restaurant by ID
+- `PUT /api/restaurants/{id}` - Update restaurant
+- `DELETE /api/restaurants/{id}` - Delete restaurant
+
+#### Offices
+- `GET /api/offices` - List all offices
+- `POST /api/offices` - Create new office
+- `GET /api/offices/{id}` - Get office by ID
+- `PUT /api/offices/{id}` - Update office
+- `DELETE /api/offices/{id}` - Delete office
+
+#### Users
+- `GET /api/users` - List all users (staff/admin accounts)
+- `POST /api/users` - Create new user
+- `GET /api/users/{id}` - Get user by ID
+- `PUT /api/users/{id}` - Update user
+- `DELETE /api/users/{id}` - Delete user
 
 ## Development
 
@@ -229,20 +367,42 @@ In a new terminal:
 ```bash
 cd backend
 go run main.go
+# Server runs on http://localhost:8080
 ```
 
 ### Frontend Development
 ```bash
 cd frontend
-npm start
+npm run dev
+# Next.js dev server on http://localhost:3000
 ```
+
+### Mobile App Development
+```bash
+cd mobile
+npm run ios     # iOS simulator
+npm run android # Android emulator
+```
+
+### Database Seeding
+Populate the database with sample data for testing:
+```bash
+cd backend/scripts
+./seed.sh
+```
+
+This creates:
+- 5 sample gym clubs
+- 15 instructors with various specialties
+- 100 members with realistic data
+- Sample classes
 
 ### Run Backend Tests
 ```bash
 cd backend
 make test
 # or
-./run_tests.sh
+go test ./...
 ```
 
 ### Build for Production
@@ -250,45 +410,50 @@ make test
 **Backend:**
 ```bash
 cd backend
-make build
-# Binary will be in backend/bin/server
+go build -o bin/server main.go
+./bin/server
 ```
 
 **Frontend:**
 ```bash
 cd frontend
 npm run build
-# Static files will be in frontend/build/
+npm start  # Production server
 ```
 
 ## Architecture
 
 ### Backend Stack
 - **Language**: Go 1.24
-- **Database**: MongoDB
-- **Authentication**: OAuth 2.0 + bcrypt
-- **Sessions**: MongoDB-backed cookie sessions
+- **Database**: MongoDB with optimized connection pooling
+- **Authentication**: 
+  - Local: bcrypt password hashing
+  - OAuth 2.0: Google and GitHub
+  - Refresh tokens: 1-hour access tokens, 7-day refresh tokens
+- **Sessions**: MongoDB-backed secure cookie sessions
+- **Middleware**: CORS, authentication validation
 
-**React (frontend/):**
-- **Framework**: React 18
-- **Routing**: React Router v6
-- **Styling**: Custom CSS
-- **API Client**: Fetch API with credentials
-
-**Next.js (frontend-nextjs/):** ⭐ Recommended
+### Frontend Stack
 - **Framework**: Next.js 16 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **API Client**: Custom TypeScript service layer
-- **Routing**: Next.js Navigation
-- **Routing**: React Router v6
-- **Styling**: Plain CSS (no framework)
-- **API Client**: Fetch API with credentials
+- **API Client**: Custom service layer with automatic token refresh
+- **Routing**: Next.js file-based routing
+- **State Management**: React hooks (useState, useEffect)
+- **Charts**: Recharts for dashboard analytics
+
+### Mobile Stack
+- **Framework**: React Native 0.83.1
+- **Language**: TypeScript
+- **Navigation**: React Navigation
+- **API Client**: Axios
+- **Storage**: AsyncStorage
 
 ### Communication
-- Frontend proxies API requests to backend during development
-- Session cookies are automatically handled
-- CORS is configured for cross-origin requests
+- Frontend uses REST API calls to backend
+- Automatic token refresh on 401 responses
+- Session cookies handled automatically
+- CORS configured for local development
 
 ## Environment Variables
 
@@ -334,13 +499,15 @@ go test ./...
 ## Security Features
 
 - ✅ Password hashing with bcrypt (cost factor 10)
-- ✅ HttpOnly session cookies (prevents XSS)
+- ✅ **Refresh token flow**: Short-lived access tokens with automatic renewal
+- ✅ HttpOnly session cookies (prevents XSS attacks)
 - ✅ SameSite cookie attribute (CSRF protection)
 - ✅ CORS middleware with credentials support
 - ✅ Environment variable configuration (no secrets in code)
-- ✅ Protected API endpoints (authentication required)
-- ✅ OAuth 2.0 integration (delegated authentication)
-- ✅ Session expiration (7-day default)
+- ✅ Protected API endpoints (middleware authentication)
+- ✅ OAuth 2.0 integration (Google, GitHub)
+- ✅ Session expiration (7-day default for refresh tokens)
+- ✅ Automatic token refresh (seamless re-authentication)
 
 ## Contributing
 

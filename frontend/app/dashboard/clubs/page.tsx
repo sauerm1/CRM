@@ -68,15 +68,7 @@ export default function ClubsPage() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <div className="mb-4">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium"
-              >
-                ← Dashboard
-              </Link>
-            </div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center">
               <h1 className="text-3xl font-bold text-gray-900">Club Locations</h1>
               <Link
                 href="/dashboard/clubs/new"
@@ -129,7 +121,7 @@ export default function ClubsPage() {
                   filteredClubs.map((club) => (
                     <tr 
                       key={club.id}
-                      onClick={() => router.push(`/dashboard/clubs/edit/${club.id}`)}
+                      onClick={() => router.push(`/dashboard/clubs/${club.id}`)}
                       className="hover:bg-gray-50 cursor-pointer"
                     >
                       <td className="px-4 py-4 whitespace-nowrap">

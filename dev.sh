@@ -95,9 +95,10 @@ ENVEOF
     echo -e "${GREEN}  ✓ Created .env${NC}"
 fi
 
-# Start backend
-GO111MODULE=on go run main.go > ../logs/backend.log 2>&1 &
+# Start backend with nohup for better stability
+nohup go run main.go > ../logs/backend.log 2>&1 &
 BACKEND_PID=$!
+echo -e "${CYAN}  Backend PID: $BACKEND_PID${NC}"
 cd ..
 
 # Wait for backend with health check
@@ -144,9 +145,10 @@ if [ ! -d "node_modules/@next/swc-darwin-x64" ] && [ "$(uname)" = "Darwin" ]; th
     npm install --save-optional @next/swc-darwin-x64 --silent
 fi
 
-# Start frontend
-npm run dev > ../logs/frontend.log 2>&1 &
+# Start frontend with nohup for better stability
+nohup npm run dev > ../logs/frontend.log 2>&1 &
 FRONTEND_PID=$!
+echo -e "${CYAN}  Frontend PID: $FRONTEND_PID${NC}"
 cd ..
 
 # Wait for frontend with health check

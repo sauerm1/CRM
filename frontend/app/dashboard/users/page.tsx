@@ -151,7 +151,11 @@ export default function UsersPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
+              <tr 
+                key={user.id} 
+                onClick={() => router.push(`/dashboard/users/${user.id}`)}
+                className="hover:bg-gray-50 cursor-pointer"
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {user.name}
                 </td>
@@ -175,13 +179,19 @@ export default function UsersPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
-                    onClick={() => router.push(`/dashboard/users/edit/${user.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/dashboard/users/edit/${user.id}`);
+                    }}
                     className="text-blue-600 hover:text-blue-900 mr-4"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(user.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(user.id);
+                    }}
                     className="text-red-600 hover:text-red-900"
                   >
                     Delete

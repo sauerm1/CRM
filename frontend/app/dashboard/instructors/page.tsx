@@ -129,7 +129,7 @@ export default function InstructorsPage() {
                   filteredInstructors.map((instructor) => (
                     <tr 
                       key={instructor.id}
-                      onClick={() => router.push(`/dashboard/instructors/edit/${instructor.id}`)}
+                      onClick={() => router.push(`/dashboard/instructors/${instructor.id}`)}
                       className="hover:bg-gray-50 cursor-pointer"
                     >
                       <td className="px-4 py-4 whitespace-nowrap">
