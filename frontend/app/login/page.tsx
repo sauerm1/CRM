@@ -31,10 +31,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
-            Gym CRM - Staff Login
+            The Field - Staff Login
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to manage members
+            Sign in to manage your club
           </p>
         </div>
         
@@ -84,13 +84,6 @@ export default function LoginPage() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
-
-          <div className="text-center text-sm">
-            <span className="text-gray-600">Don't have an account? </span>
-            <Link href="/register" className="font-medium text-green-600 hover:text-green-500">
-              Register
-            </Link>
-          </div>
         </form>
       </div>
     </div>

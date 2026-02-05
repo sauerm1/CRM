@@ -45,7 +45,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role?: string; // admin, all_services, restaurant, office, classes
+  role?: string; // admin, club_manager, all_services, restaurant, office, classes
   assigned_club_ids?: string[];
   active?: boolean;
   active?: boolean;

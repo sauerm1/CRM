@@ -148,21 +148,22 @@ export default function ReservationsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredReservations.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                   No reservations found.
                 </td>
               </tr>
             ) : (
               filteredReservations.map((reservation) => (
-                <tr key={reservation.id} className="hover:bg-gray-50">
+                <tr 
+                  key={reservation.id} 
+                  onClick={() => router.push(`/dashboard/restaurants/${restaurantId}/reservations/edit/${reservation.id}`)}
+                  className="hover:bg-gray-50 cursor-pointer"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {reservation.guest_name}
@@ -187,20 +188,6 @@ export default function ReservationsPage() {
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
                       {reservation.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => router.push(`/dashboard/restaurants/${restaurantId}/reservations/edit/${reservation.id}`)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(reservation.id!)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
                   </td>
                 </tr>
               ))

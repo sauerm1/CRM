@@ -83,7 +83,7 @@ Added comprehensive CRM-specific styles:
 
 #### 4. Branding Updates
 Updated authentication pages:
-- Login page: "Gym CRM - Staff Login"
+- Login page: "The Field - Staff Login"
 - Register page: "Gym CRM - Staff Registration"
 - Welcome message mentions gym CRM context
 

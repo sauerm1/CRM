@@ -326,19 +326,19 @@ export default function ClassDetailPage({ params }: { params: Promise<{ id: stri
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Email</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Phone</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Membership</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {classData.enrolled_members_details?.map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={member.id} 
+                      onClick={() => router.push(`/dashboard/member/${member.id}`)}
+                      className="hover:bg-gray-50 cursor-pointer"
+                    >
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <Link 
-                          href={`/dashboard/member/${member.id}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-900 hover:underline"
-                        >
+                        <div className="text-sm font-medium text-gray-900">
                           {member.first_name} {member.last_name}
-                        </Link>
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm text-gray-600">{member.email}</div>
@@ -348,14 +348,6 @@ export default function ClassDetailPage({ params }: { params: Promise<{ id: stri
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-600 capitalize">{member.membership_type}</div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleUnenroll(member.id!)}
-                          className="text-red-600 hover:text-red-900 text-sm font-medium"
-                        >
-                          Remove
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -376,33 +368,25 @@ export default function ClassDetailPage({ params }: { params: Promise<{ id: stri
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Name</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Email</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Phone</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {classData.wait_list_details?.map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={member.id} 
+                      onClick={() => router.push(`/dashboard/member/${member.id}`)}
+                      className="hover:bg-gray-50 cursor-pointer"
+                    >
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <Link 
-                          href={`/dashboard/member/${member.id}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-900 hover:underline"
-                        >
+                        <div className="text-sm font-medium text-gray-900">
                           {member.first_name} {member.last_name}
-                        </Link>
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm text-gray-600">{member.email}</div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-600">{member.phone}</div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleRemoveFromWaitlist(member.id!)}
-                          className="text-red-600 hover:text-red-900 text-sm font-medium"
-                        >
-                          Remove
-                        </button>
                       </td>
                     </tr>
                   ))}

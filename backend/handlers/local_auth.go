@@ -75,8 +75,7 @@ func (h *LocalAuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Check if user already exists
 	var existingUser models.User
 	err := collection.FindOne(ctx, bson.M{
-		"email":    strings.ToLower(req.Email),
-		"provider": "local",
+		"email": strings.ToLower(req.Email),
 	}).Decode(&existingUser)
 
 	if err == nil {
@@ -98,7 +97,6 @@ func (h *LocalAuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	user := models.User{
 		Email:     strings.ToLower(req.Email),
 		Name:      req.Name,
-		Provider:  "local",
 		Password:  string(hashedPassword),
 		Role:      "admin", // Default to admin for now, can be changed via user management
 		Active:    true,
@@ -179,11 +177,10 @@ func (h *LocalAuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	collection := h.db.Collection("users")
 
-	// Find user by email and provider
+	// Find user by email
 	var user models.User
 	err := collection.FindOne(ctx, bson.M{
-		"email":    strings.ToLower(req.Email),
-		"provider": "local",
+		"email": strings.ToLower(req.Email),
 	}).Decode(&user)
 
 	if err == mongo.ErrNoDocuments {
@@ -199,6 +196,12 @@ func (h *LocalAuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		return
+	}
+
+	// Check if user is active
+	if !user.Active {
+		http.Error(w, "Account is inactive. Please contact your administrator.", http.StatusForbidden)
 		return
 	}
 

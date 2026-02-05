@@ -67,7 +67,6 @@ func main() {
 	mux.HandleFunc("/health", h.HealthHandler)
 
 	// Local authentication routes
-	mux.HandleFunc("/auth/register", localAuthHandler.Register)
 	mux.HandleFunc("/auth/login", localAuthHandler.Login)
 	mux.HandleFunc("/auth/refresh", localAuthHandler.RefreshToken)
 
@@ -131,6 +130,9 @@ func main() {
 	mux.HandleFunc("GET /api/users/{id}", authMiddleware.RequireAuth(handlers.GetUser(userCollection)))
 	mux.HandleFunc("PUT /api/users/{id}", authMiddleware.RequireAuth(handlers.UpdateUser(userCollection)))
 	mux.HandleFunc("DELETE /api/users/{id}", authMiddleware.RequireAuth(handlers.DeleteUser(userCollection)))
+
+	// User profile routes
+	mux.HandleFunc("POST /api/me/change-password", authMiddleware.RequireAuth(handlers.ChangePassword(userCollection)))
 
 	// Create server
 	srv := &http.Server{

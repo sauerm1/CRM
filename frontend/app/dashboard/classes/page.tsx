@@ -398,13 +398,12 @@ export default function ClassesPage() {
                   >
                     Status<SortIcon field="status" />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredClasses.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                       {searchTerm ? `No classes found matching "${searchTerm}"` : 'No classes scheduled'}
                     </td>
                   </tr>
@@ -454,22 +453,6 @@ export default function ClassesPage() {
                           <span className={getStatusBadgeClass(cls.status)}>
                             {cls.status}
                           </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                            <Link
-                              href={`/dashboard/classes/edit/${cls.id}`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Edit
-                            </Link>
-                            <button
-                              onClick={() => handleDelete(cls.id!)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
-                          </div>
                         </td>
                       </tr>
                     );

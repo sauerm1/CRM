@@ -251,12 +251,15 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Name</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Email</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {members.map((member) => (
-                        <tr key={member.id} className="hover:bg-gray-50">
+                        <tr 
+                          key={member.id} 
+                          onClick={() => router.push(`/dashboard/member/${member.id}`)}
+                          className="hover:bg-gray-50 cursor-pointer"
+                        >
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {member.first_name} {member.last_name}
@@ -275,14 +278,6 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                             }`}>
                               {member.status}
                             </span>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <Link
-                              href={`/dashboard/members/${member.id}`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              View
-                            </Link>
                           </td>
                         </tr>
                       ))}
@@ -307,12 +302,15 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Name</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Email</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Specialties</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {instructors.map((instructor) => (
-                        <tr key={instructor.id} className="hover:bg-gray-50">
+                        <tr 
+                          key={instructor.id} 
+                          onClick={() => router.push(`/dashboard/instructors/${instructor.id}`)}
+                          className="hover:bg-gray-50 cursor-pointer"
+                        >
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{instructor.name}</div>
                           </td>
@@ -327,14 +325,6 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                                 </span>
                               ))}
                             </div>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <Link
-                              href={`/dashboard/instructors/${instructor.id}`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              View
-                            </Link>
                           </td>
                         </tr>
                       ))}
@@ -360,12 +350,15 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Date & Time</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Enrollment</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {classes.map((cls) => (
-                        <tr key={cls.id} className="hover:bg-gray-50">
+                        <tr 
+                          key={cls.id} 
+                          onClick={() => router.push(`/dashboard/classes/${cls.id}`)}
+                          className="hover:bg-gray-50 cursor-pointer"
+                        >
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{cls.name}</div>
                           </td>
@@ -389,14 +382,6 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
                             }`}>
                               {cls.status}
                             </span>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <Link
-                              href={`/dashboard/classes/edit/${cls.id}`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              View
-                            </Link>
                           </td>
                         </tr>
                       ))}

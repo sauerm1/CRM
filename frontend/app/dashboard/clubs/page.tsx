@@ -107,13 +107,12 @@ export default function ClubsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">City</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Phone</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredClubs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                       {searchTerm ? `No clubs found matching "${searchTerm}"` : 'No clubs found. Add your first club location!'}
                     </td>
                   </tr>
@@ -144,22 +143,6 @@ export default function ClubsPage() {
                         }`}>
                           {club.active ? 'Active' : 'Inactive'}
                         </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link
-                            href={`/dashboard/clubs/edit/${club.id}`}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(club.id!, club.name)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))

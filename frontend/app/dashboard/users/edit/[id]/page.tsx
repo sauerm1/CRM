@@ -159,6 +159,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
               className="w-full border border-gray-300 rounded-md p-2 text-gray-900"
             >
               <option value="admin">Admin - All services at all locations</option>
+              <option value="club_manager">Club Manager - All services at assigned locations (can manage users)</option>
               <option value="all_services">All Services - All services at assigned locations</option>
               <option value="restaurant">Restaurant - Restaurant service only</option>
               <option value="office">Office/Co-working - Office service only</option>
@@ -166,6 +167,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             </select>
             <p className="text-xs text-gray-500 mt-1">
               {formData.role === 'admin' && 'Full access to all services at all locations'}
+              {formData.role === 'club_manager' && 'Can manage all services and users at assigned locations'}
               {formData.role === 'all_services' && 'Access to all services at assigned locations only'}
               {formData.role === 'restaurant' && 'Access to restaurant management only'}
               {formData.role === 'office' && 'Access to office/co-working management only'}
@@ -181,6 +183,8 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             <p className="text-xs text-gray-500 mb-2">
               {formData.role === 'admin' 
                 ? 'Admin role has access to all locations automatically' 
+                : formData.role === 'club_manager'
+                ? 'Club managers can manage all services and users at these locations'
                 : 'Select the locations this user can access'}
             </p>
             <div className="border border-gray-300 rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">

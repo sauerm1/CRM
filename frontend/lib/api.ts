@@ -424,3 +424,16 @@ export const deleteUser = async (id: string) => {
     method: 'DELETE',
   });
 };
+
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  return authenticatedFetch(`${API_BASE_URL}/api/me/change-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+};

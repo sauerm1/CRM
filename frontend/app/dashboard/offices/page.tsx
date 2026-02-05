@@ -101,60 +101,65 @@ export default function OfficesPage() {
           <p className="text-gray-600">No offices found. Some clubs may not have office spaces available.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredOffices.map((office) => (
-            <div
-              key={office.id}
-              onClick={() => router.push(`/dashboard/offices/${office.id}`)}
-              className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer p-6"
-            >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-xl font-semibold text-gray-900">{office.name}</h3>
-                {office.active ? (
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                    Active
-                  </span>
-                ) : (
-                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                    Inactive
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm text-gray-600 mb-2">{getClubName(office.club_id)}</p>
-              
-              <div className="mb-3">
-                <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                  {getOfficeTypeLabel(office.type)}
-                </span>
-              </div>
-
-              <p className="text-sm text-gray-700 mb-3">{office.description}</p>
-
-              <div className="text-sm text-gray-600 space-y-1 mb-3">
-                <p>Capacity: {office.capacity} {office.capacity === 1 ? 'person' : 'people'}</p>
-                <p>Hourly: ${office.hourly_rate}/hr • Daily: ${office.daily_rate}/day</p>
-              </div>
-
-              {office.amenities && office.amenities.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {office.amenities.slice(0, 3).map((amenity, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-                    >
-                      {amenity}
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Club</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Type</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Capacity</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Rates</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredOffices.map((office) => (
+                <tr 
+                  key={office.id}
+                  onClick={() => router.push(`/dashboard/offices/${office.id}`)}
+                  className="hover:bg-gray-50 cursor-pointer"
+                >
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{office.name}</div>
+                    {office.description && (
+                      <div className="text-xs text-gray-500 truncate max-w-xs">{office.description}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">{getClubName(office.club_id)}</div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {getOfficeTypeLabel(office.type)}
                     </span>
-                  ))}
-                  {office.amenities.length > 3 && (
-                    <span className="text-gray-500 text-xs px-2 py-1">
-                      +{office.amenities.length - 3} more
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {office.capacity} {office.capacity === 1 ? 'person' : 'people'}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      ${office.hourly_rate}/hr
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      ${office.daily_rate}/day
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      office.active 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {office.active ? 'Active' : 'Inactive'}
                     </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

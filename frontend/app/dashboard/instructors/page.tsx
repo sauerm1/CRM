@@ -115,13 +115,12 @@ export default function InstructorsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Phone</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Specialty</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredInstructors.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                       {searchTerm ? `No instructors found matching "${searchTerm}"` : 'No instructors found'}
                     </td>
                   </tr>
@@ -152,22 +151,6 @@ export default function InstructorsPage() {
                         }`}>
                           {instructor.active ? 'Active' : 'Inactive'}
                         </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                          <Link
-                            href={`/dashboard/instructors/edit/${instructor.id}`}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(instructor.id!, instructor.name)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))

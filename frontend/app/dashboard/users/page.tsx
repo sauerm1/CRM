@@ -42,6 +42,8 @@ export default function UsersPage() {
     switch (role) {
       case 'admin':
         return 'bg-purple-100 text-purple-800';
+      case 'club_manager':
+        return 'bg-indigo-100 text-indigo-800';
       case 'all_services':
         return 'bg-blue-100 text-blue-800';
       case 'restaurant':
@@ -59,6 +61,8 @@ export default function UsersPage() {
     switch (role) {
       case 'admin':
         return 'Admin';
+      case 'club_manager':
+        return 'Club Manager';
       case 'all_services':
         return 'All Services';
       case 'restaurant':
@@ -76,6 +80,8 @@ export default function UsersPage() {
     switch (role) {
       case 'admin':
         return 'All services at all locations';
+      case 'club_manager':
+        return 'All services at assigned locations';
       case 'all_services':
         return 'All services at assigned locations';
       case 'restaurant':
@@ -117,6 +123,7 @@ export default function UsersPage() {
         >
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
+          <option value="club_manager">Club Manager</option>
           <option value="all_services">All Services</option>
           <option value="restaurant">Restaurant</option>
           <option value="office">Office/Co-working</option>
@@ -143,9 +150,6 @@ export default function UsersPage() {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
               </th>
             </tr>
           </thead>
@@ -176,26 +180,6 @@ export default function UsersPage() {
                   }`}>
                     {user.active ? 'Active' : 'Inactive'}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/dashboard/users/edit/${user.id}`);
-                    }}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(user.id);
-                    }}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
                 </td>
               </tr>
             ))}
