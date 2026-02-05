@@ -367,7 +367,7 @@ func ChangePassword(collection *mongo.Collection) http.HandlerFunc {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		
+
 		user, ok := contextUser.(*models.User)
 		if !ok {
 			http.Error(w, "Invalid user context", http.StatusInternalServerError)
