@@ -283,6 +283,45 @@ export default function MemberDetailPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
+            {/* Billing History */}
+            {member.billing_history && member.billing_history.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Billing History</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {member.billing_history.map((entry, idx) => (
+                        <tr key={idx}>
+                          <td className="px-4 py-2 whitespace-nowrap">{new Date(entry.date).toLocaleDateString()}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">${entry.amount.toFixed(2)}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{entry.description}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              entry.status === 'paid' ? 'bg-green-100 text-green-800' :
+                              entry.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              entry.status === 'failed' ? 'bg-red-100 text-red-800' :
+                              entry.status === 'refunded' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Notes */}
             {member.notes && (
               <div className="mb-8">

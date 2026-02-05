@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"go-api-mongo/models"
@@ -13,6 +14,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// Helper function to migrate old name field to first_name/last_name
+func migrateUserName(user *models.User) {
+	// If we have the old name field but not the new ones, split it
+	if user.Name != "" && user.FirstName == "" && user.LastName == "" {
+		// Simple split on first space
+		parts := strings.SplitN(user.Name, " ", 2)
+		user.FirstName = parts[0]
+		if len(parts) > 1 {
+			user.LastName = parts[1]
+		}
+	}
+}
 
 func GetUsers(collection *mongo.Collection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +61,11 @@ func GetUsers(collection *mongo.Collection) http.HandlerFunc {
 			users = []models.User{}
 		}
 
+		// Migrate old name format to first_name/last_name
+		for i := range users {
+			migrateUserName(&users[i])
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(users)
 	}
@@ -72,6 +91,9 @@ func GetUser(collection *mongo.Collection) http.HandlerFunc {
 			return
 		}
 
+		// Migrate old name format to first_name/last_name
+		migrateUserName(&user)
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(user)
 	}
@@ -93,7 +115,8 @@ func CreateUser(collection *mongo.Collection) http.HandlerFunc {
 
 		var input struct {
 			Email           string   `json:"email"`
-			Name            string   `json:"name"`
+			FirstName       string   `json:"first_name"`
+			LastName        string   `json:"last_name"`
 			Password        string   `json:"password"`
 			Role            string   `json:"role"`
 			AssignedClubIDs []string `json:"assigned_club_ids"`
@@ -106,8 +129,8 @@ func CreateUser(collection *mongo.Collection) http.HandlerFunc {
 		}
 
 		// Validate required fields
-		if input.Email == "" || input.Name == "" || input.Password == "" || input.Role == "" {
-			http.Error(w, "Email, name, password, and role are required", http.StatusBadRequest)
+		if input.Email == "" || input.FirstName == "" || input.LastName == "" || input.Password == "" || input.Role == "" {
+			http.Error(w, "Email, first name, last name, password, and role are required", http.StatusBadRequest)
 			return
 		}
 
@@ -157,7 +180,8 @@ func CreateUser(collection *mongo.Collection) http.HandlerFunc {
 
 		user := models.User{
 			Email:           input.Email,
-			Name:            input.Name,
+			FirstName:       input.FirstName,
+			LastName:        input.LastName,
 			Password:        string(hashedPassword),
 			Role:            input.Role,
 			AssignedClubIDs: clubObjIDs,
@@ -213,7 +237,8 @@ func UpdateUser(collection *mongo.Collection) http.HandlerFunc {
 		}
 
 		var input struct {
-			Name            string   `json:"name"`
+			FirstName       string   `json:"first_name"`
+			LastName        string   `json:"last_name"`
 			Role            string   `json:"role"`
 			AssignedClubIDs []string `json:"assigned_club_ids"`
 			Active          *bool    `json:"active"`
@@ -280,8 +305,11 @@ func UpdateUser(collection *mongo.Collection) http.HandlerFunc {
 			},
 		}
 
-		if input.Name != "" {
-			update["$set"].(bson.M)["name"] = input.Name
+		if input.FirstName != "" {
+			update["$set"].(bson.M)["first_name"] = input.FirstName
+		}
+		if input.LastName != "" {
+			update["$set"].(bson.M)["last_name"] = input.LastName
 		}
 		if input.Role != "" {
 			update["$set"].(bson.M)["role"] = input.Role

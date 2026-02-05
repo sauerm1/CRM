@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getUser, getClubs } from '@/lib/api';
+import { getUser, getClubs, deleteUser } from '@/lib/api';
 import { User, Club } from '@/types';
 
 export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -93,6 +93,20 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
     return assignedClubs.map(club => club.name).join(', ') || 'No clubs found';
   };
 
+  const handleDelete = async () => {
+    if (!user) return;
+    const userName = user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.name || user.email;
+    if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) return;
+
+    try {
+      await deleteUser(user.id);
+      router.push('/dashboard/users');
+    } catch (error: any) {
+      console.error('Failed to delete user:', error);
+      alert('Failed to delete user: ' + error.message);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-gray-900">Loading...</div>;
   }
@@ -112,7 +126,9 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.name || user.email}
+            </h1>
             <p className="text-gray-600">{user.email}</p>
           </div>
           <div className="flex gap-2">
@@ -122,6 +138,12 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             >
               Edit User
             </Link>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Delete
+            </button>
           </div>
         </div>
 
@@ -131,10 +153,23 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
           <div className="border rounded-lg p-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
             <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-500">Name</label>
-                <p className="text-gray-900">{user.name}</p>
-              </div>
+              {user.first_name && user.last_name ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">First Name</label>
+                    <p className="text-gray-900">{user.first_name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Last Name</label>
+                    <p className="text-gray-900">{user.last_name}</p>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Name</label>
+                  <p className="text-gray-900">{user.name || 'N/A'}</p>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 <p className="text-gray-900">{user.email}</p>

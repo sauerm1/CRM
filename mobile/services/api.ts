@@ -7,9 +7,16 @@ import type {
   Class,
   Restaurant,
   Club,
+  Office,
+  ClassBooking,
+  OfficeBooking,
+  Reservation,
   LoginCredentials,
   RegisterCredentials,
   AuthResponse,
+  CreateClassBookingRequest,
+  CreateOfficeBookingRequest,
+  CreateReservationRequest,
 } from '../types';
 
 class ApiService {
@@ -20,6 +27,7 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
+      timeout: 10000, // 10 second timeout
       headers: {
         'Content-Type': 'application/json',
       },
@@ -159,11 +167,63 @@ class ApiService {
   async getClasses(): Promise<Class[]> {
     const response = await this.api.get('/api/classes');
     return response.data;
+  // Class Booking methods
+  async createClassBooking(data: CreateClassBookingRequest): Promise<ClassBooking> {
+    const response = await this.api.post('/api/class-bookings', data);
+    return response.data;
   }
 
-  async getClass(id: string): Promise<Class> {
-    const response = await this.api.get(`/api/classes/${id}`);
+  async getClassBookings(memberId?: string): Promise<ClassBooking[]> {
+    const params = memberId ? { member_id: memberId } : {};
+    const response = await this.api.get('/api/class-bookings', { params });
     return response.data;
+  }
+
+  async cancelClassBooking(id: string): Promise<void> {
+    await this.api.post(`/api/class-bookings/${id}/cancel
+  async getClass(id: string): Promise<Class> {
+  // Reservation methods
+  async createReservation(data: CreateReservationRequest): Promise<Reservation> {
+    const response = await this.api.post('/api/reservations', data);
+    return response.data;
+  }
+
+  async getReservations(memberId?: string): Promise<Reservation[]> {
+    const params = memberId ? { member_id: memberId } : {};
+    const response = await this.api.get('/api/reservations', { params });
+    return response.data;
+  }
+
+  async cancelReservation(id: string): Promise<void> {
+    await this.api.delete(`/api/reservations/${id}`);
+  }
+
+  // Office methods
+  async getOffices(clubId?: string): Promise<Office[]> {
+    const params = clubId ? { club_id: clubId } : {};
+    const response = await this.api.get('/api/offices', { params });
+    return response.data;
+  }
+
+  async getOffice(id: string): Promise<Office> {
+    const response = await this.api.get(`/api/offices/${id}`);
+    return response.data;
+  }
+
+  // Office Booking methods
+  async createOfficeBooking(data: CreateOfficeBookingRequest): Promise<OfficeBooking> {
+    const response = await this.api.post('/api/office-bookings', data);
+    return response.data;
+  }
+
+  async getOfficeBookings(memberId?: string): Promise<OfficeBooking[]> {
+    const params = memberId ? { member_id: memberId } : {};
+    const response = await this.api.get('/api/office-bookings', { params });
+    return response.data;
+  }
+
+  async cancelOfficeBooking(id: string): Promise<void> {
+    await this.api.delete(`/api/office-bookings/${id}`
   }
 
   async bookClass(classId: string): Promise<void> {

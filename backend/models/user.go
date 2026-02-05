@@ -10,7 +10,9 @@ import (
 type User struct {
 	ID              primitive.ObjectID   `json:"id" bson:"_id,omitempty"`
 	Email           string               `json:"email" bson:"email"`
-	Name            string               `json:"name" bson:"name"`
+	FirstName       string               `json:"first_name" bson:"first_name"`
+	LastName        string               `json:"last_name" bson:"last_name"`
+	Name            string               `json:"name,omitempty" bson:"name,omitempty"` // Deprecated, kept for backwards compatibility
 	Picture         string               `json:"picture,omitempty" bson:"picture,omitempty"`
 	Password        string               `json:"-" bson:"password,omitempty"`
 	Role            string               `json:"role" bson:"role"` // admin, club_manager, all_services, restaurant, office, classes

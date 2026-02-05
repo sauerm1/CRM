@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getRestaurant, getClubs } from '@/lib/api';
+import { getRestaurant, getClubs, deleteRestaurant } from '@/lib/api';
 import type { Restaurant, Club } from '@/types';
 
 export default function RestaurantDetailsPage() {
@@ -33,6 +33,19 @@ export default function RestaurantDetailsPage() {
       console.error('Failed to load restaurant:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!restaurant) return;
+    if (!window.confirm(`Are you sure you want to delete restaurant "${restaurant.name}"? This action cannot be undone.`)) return;
+
+    try {
+      await deleteRestaurant(restaurant.id!);
+      router.push('/dashboard/restaurants');
+    } catch (error: any) {
+      console.error('Failed to delete restaurant:', error);
+      alert('Failed to delete restaurant: ' + error.message);
     }
   };
 
@@ -75,6 +88,12 @@ export default function RestaurantDetailsPage() {
                 >
                   Edit Restaurant
                 </Link>
+                <button
+                  onClick={handleDelete}
+                  className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium"
+                >
+                  Delete
+                </button>
                 <Link
                   href={`/dashboard/restaurants/${restaurant.id}/reservations`}
                   className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"

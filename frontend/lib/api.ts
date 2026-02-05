@@ -51,7 +51,9 @@ const handleResponse = async (response: Response, originalRequest?: () => Promis
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'An error occurred' }));
-    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    const errorMessage = error.error || `HTTP error! status: ${response.status}`;
+    console.error(`API Error: ${errorMessage}`, { status: response.status, url: response.url });
+    throw new Error(errorMessage);
   }
   // Handle 204 No Content responses
   if (response.status === 204) {

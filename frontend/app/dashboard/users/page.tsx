@@ -19,8 +19,11 @@ export default function UsersPage() {
     try {
       const data = await getUsers(roleFilter);
       setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    } catch (error: any) {
+      // Only log if it's not a redirect to login (401 handled by API layer)
+      if (!error.message?.includes('Session expired')) {
+        console.error('Error fetching users:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -161,7 +164,7 @@ export default function UsersPage() {
                 className="hover:bg-gray-50 cursor-pointer"
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {user.name}
+                  {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.name || user.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {user.email}

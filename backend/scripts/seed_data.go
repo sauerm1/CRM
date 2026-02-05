@@ -138,6 +138,13 @@ type OfficeBooking struct {
 	UpdatedAt time.Time           `bson:"updated_at"`
 }
 
+type BillingEntry struct {
+	Date        time.Time `bson:"date" json:"date"`
+	Amount      float64   `bson:"amount" json:"amount"`
+	Description string    `bson:"description" json:"description"`
+	Status      string    `bson:"status" json:"status"`
+}
+
 var firstNames = []string{
 	"James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda",
 	"William", "Barbara", "David", "Elizabeth", "Richard", "Susan", "Joseph", "Jessica",
@@ -437,24 +444,49 @@ func seedMembers(ctx context.Context, db *mongo.Database, clubIDs []primitive.Ob
 			clubID = &randomClubID
 		}
 
-		member := Member{
-			ClubID:           clubID,
-			FirstName:        firstName,
-			LastName:         lastName,
-			Email:            fmt.Sprintf("%s.%s%d@example.com", firstName, lastName, rand.Intn(1000)),
-			Phone:            randomPhone(),
-			MembershipType:   randomString(membershipTypes),
-			Status:           status,
-			JoinDate:         joinDate,
-			ExpiryDate:       expiryDate,
-			AutoRenewal:      autoRenewal,
-			EmergencyContact: fmt.Sprintf("%s %s - %s", randomString(firstNames), randomString(lastNames), randomPhone()),
-			Notes:            randomString(memberNotes),
-			CreatedAt:        joinDate,
-			UpdatedAt:        now,
+		// Generate billing history: one entry per month from join to expiry
+		var billingHistory []BillingEntry
+		billDate := joinDate
+		for billDate.Before(expiryDate) {
+			amount := 50.0 + rand.Float64()*100.0 // $50-$150
+			statusIdx := rand.Intn(100)
+			var billStatus string
+			if statusIdx < 85 {
+				billStatus = "paid"
+			} else if statusIdx < 95 {
+				billStatus = "pending"
+			} else if statusIdx < 98 {
+				billStatus = "failed"
+			} else {
+				billStatus = "refunded"
+			}
+			billingHistory = append(billingHistory, BillingEntry{
+				Date:        billDate,
+				Amount:      amount,
+				Description: fmt.Sprintf("%s Membership Fee", randomString(membershipTypes)),
+				Status:      billStatus,
+			})
+			billDate = billDate.AddDate(0, 1, 0)
 		}
 
-		members[i] = member
+		memberMap := map[string]interface{}{
+			"club_id":           clubID,
+			"first_name":        firstName,
+			"last_name":         lastName,
+			"email":             fmt.Sprintf("%s.%s%d@example.com", firstName, lastName, rand.Intn(1000)),
+			"phone":             randomPhone(),
+			"membership_type":   randomString(membershipTypes),
+			"status":            status,
+			"join_date":         joinDate,
+			"expiry_date":       expiryDate,
+			"auto_renewal":      autoRenewal,
+			"emergency_contact": fmt.Sprintf("%s %s - %s", randomString(firstNames), randomString(lastNames), randomPhone()),
+			"notes":             randomString(memberNotes),
+			"created_at":        joinDate,
+			"updated_at":        now,
+			"billing_history":   billingHistory,
+		}
+		members[i] = memberMap
 	}
 
 	// Insert all members
@@ -467,7 +499,7 @@ func seedMembers(ctx context.Context, db *mongo.Database, clubIDs []primitive.Ob
 		memberIDs[i] = id.(primitive.ObjectID)
 	}
 
-	fmt.Printf("✓ Successfully inserted %d members\n", len(memberIDs))
+	fmt.Printf("✓ Successfully inserted %d members (with billing history)\n", len(memberIDs))
 	return memberIDs
 }
 
@@ -530,19 +562,19 @@ func seedClasses(ctx context.Context, db *mongo.Database, clubIDs []primitive.Ob
 	for i := 0; i < numClasses; i++ {
 		classInfo := classData[rand.Intn(len(classData))]
 		clubID := clubIDs[rand.Intn(len(clubIDs))]
-		
+
 		// Get a random instructor
 		instructorID := instructorIDs[rand.Intn(len(instructorIDs))]
-		
+
 		// Random date within next 14 days or past 7 days
 		daysOffset := rand.Intn(21) - 7 // -7 to +14 days
 		classDate := now.AddDate(0, 0, daysOffset)
-		
+
 		// Random start time between 6 AM and 8 PM
 		startHour := rand.Intn(14) + 6
 		startMinute := []int{0, 15, 30, 45}[rand.Intn(4)]
 		startTime := fmt.Sprintf("%02d:%02d", startHour, startMinute)
-		
+
 		endHour := startHour + (classInfo.duration / 60)
 		endMinute := startMinute + (classInfo.duration % 60)
 		if endMinute >= 60 {
@@ -576,7 +608,7 @@ func seedClasses(ctx context.Context, db *mongo.Database, clubIDs []primitive.Ob
 			if numEnrolled > len(memberIDs) {
 				numEnrolled = len(memberIDs)
 			}
-			
+
 			// Randomly select members
 			shuffled := make([]primitive.ObjectID, len(memberIDs))
 			copy(shuffled, memberIDs)
@@ -633,11 +665,11 @@ func seedReservations(ctx context.Context, db *mongo.Database, restaurantIDs []p
 
 	for i := 0; i < numReservations; i++ {
 		restaurantID := restaurantIDs[rand.Intn(len(restaurantIDs))]
-		
+
 		// Random date within next 14 days or past 7 days
 		daysOffset := rand.Intn(21) - 7 // -7 to +14 days
 		reservationDate := now.AddDate(0, 0, daysOffset)
-		
+
 		// Random time between 11 AM and 8 PM
 		hour := rand.Intn(9) + 11
 		minute := []int{0, 15, 30, 45}[rand.Intn(4)]
@@ -668,7 +700,7 @@ func seedReservations(ctx context.Context, db *mongo.Database, restaurantIDs []p
 		// 80% of reservations are by members, 20% are guests
 		var memberID *primitive.ObjectID
 		var guestName, guestEmail, guestPhone string
-		
+
 		if rand.Float32() < 0.8 && len(memberIDs) > 0 {
 			randomMemberID := memberIDs[rand.Intn(len(memberIDs))]
 			memberID = &randomMemberID
@@ -738,18 +770,18 @@ func seedOffices(ctx context.Context, db *mongo.Database, clubIDs []primitive.Ob
 
 	for _, clubIdx := range clubsWithOffices {
 		clubID := clubIDs[clubIdx]
-		
+
 		// Each club gets 5-10 offices
 		numOffices := rand.Intn(6) + 5
-		
+
 		for i := 0; i < numOffices; i++ {
 			officeType := officeTypes[rand.Intn(len(officeTypes))]
 			names := officeNames[officeType]
 			name := names[rand.Intn(len(names))]
-			
+
 			var capacity int
 			var hourlyRate, dailyRate float64
-			
+
 			switch officeType {
 			case "private":
 				capacity = 1
@@ -823,22 +855,22 @@ func seedOfficeBookings(ctx context.Context, db *mongo.Database, officeIDs []pri
 	for i := 0; i < numBookings; i++ {
 		officeID := officeIDs[rand.Intn(len(officeIDs))]
 		memberID := memberIDs[rand.Intn(len(memberIDs))]
-		
+
 		// Random date within next 14 days or past 7 days
 		daysOffset := rand.Intn(21) - 7
 		bookingDate := now.AddDate(0, 0, daysOffset)
-		
+
 		// Random start hour between 8 AM and 4 PM (to allow for end time)
 		startHour := rand.Intn(8) + 8
 		startMinute := []int{0, 30}[rand.Intn(2)]
-		
+
 		startTime := time.Date(bookingDate.Year(), bookingDate.Month(), bookingDate.Day(),
 			startHour, startMinute, 0, 0, bookingDate.Location())
-		
+
 		// Booking duration: 1-8 hours
 		durationHours := rand.Intn(8) + 1
 		endTime := startTime.Add(time.Duration(durationHours) * time.Hour)
-		
+
 		// Determine status based on date
 		var status string
 		if daysOffset < 0 {
@@ -859,11 +891,11 @@ func seedOfficeBookings(ctx context.Context, db *mongo.Database, officeIDs []pri
 				status = "cancelled"
 			}
 		}
-		
+
 		// Calculate cost (hourly rate * hours)
 		hourlyRate := 10.0 + float64(rand.Intn(20))
 		totalCost := hourlyRate * float64(durationHours)
-		
+
 		booking := OfficeBooking{
 			OfficeID:  &officeID,
 			MemberID:  &memberID,

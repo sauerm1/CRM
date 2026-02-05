@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getClub, getMembers, getInstructors, getClasses } from '@/lib/api';
+import { getClub, getMembers, getInstructors, getClasses, deleteClub } from '@/lib/api';
 import type { Club, Member, Instructor, Class } from '@/types';
 
 export default function ClubDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -79,6 +79,19 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
   const totalCapacity = classes.reduce((sum, c) => sum + (c.capacity || 0), 0);
   const totalEnrolled = classes.reduce((sum, c) => sum + (c.enrolled || 0), 0);
 
+  const handleDelete = async () => {
+    if (!club) return;
+    if (!window.confirm(`Are you sure you want to delete club "${club.name}"? This will affect all associated members, classes, and instructors. This action cannot be undone.`)) return;
+
+    try {
+      await deleteClub(club.id!);
+      router.push('/dashboard/clubs');
+    } catch (error: any) {
+      console.error('Failed to delete club:', error);
+      alert('Failed to delete club: ' + error.message);
+    }
+  };
+
   return (
     <div className="p-8">
       <div className="mb-6">
@@ -101,6 +114,12 @@ export default function ClubDetailPage({ params }: { params: Promise<{ id: strin
             >
               Edit Club
             </Link>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Delete
+            </button>
           </div>
         </div>
 

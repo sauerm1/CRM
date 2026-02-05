@@ -17,7 +17,13 @@ import (
 // CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		origin := r.Header.Get("Origin")
+		// Allow localhost:3000 (frontend) and any Expo Go requests
+		if origin == "http://localhost:3000" || origin == "http://10.7.150.85:8082" || origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -58,6 +64,7 @@ func main() {
 	reservationCollection := db.Client.Database(db.DatabaseName).Collection("reservations")
 	officeCollection := db.Client.Database(db.DatabaseName).Collection("offices")
 	officeBookingCollection := db.Client.Database(db.DatabaseName).Collection("office_bookings")
+	classBookingCollection := db.Client.Database(db.DatabaseName).Collection("class_bookings")
 	userCollection := db.Client.Database(db.DatabaseName).Collection("users")
 
 	// Setup routes
@@ -122,6 +129,15 @@ func main() {
 	mux.HandleFunc("POST /api/office-bookings", authMiddleware.RequireAuth(handlers.CreateOfficeBooking(officeBookingCollection)))
 	mux.HandleFunc("GET /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.GetOfficeBooking(officeBookingCollection)))
 	mux.HandleFunc("PUT /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.UpdateOfficeBooking(officeBookingCollection)))
+
+	// Class booking routes - require authentication
+	classBookingHandler := &handlers.ClassBookingHandler{Collection: classBookingCollection}
+	mux.HandleFunc("GET /api/class-bookings", authMiddleware.RequireAuth(classBookingHandler.List))
+	mux.HandleFunc("POST /api/class-bookings", authMiddleware.RequireAuth(classBookingHandler.Create))
+	mux.HandleFunc("GET /api/class-bookings/{id}", authMiddleware.RequireAuth(classBookingHandler.Get))
+	mux.HandleFunc("PUT /api/class-bookings/{id}", authMiddleware.RequireAuth(classBookingHandler.Update))
+	mux.HandleFunc("DELETE /api/class-bookings/{id}", authMiddleware.RequireAuth(classBookingHandler.Delete))
+	mux.HandleFunc("POST /api/class-bookings/{id}/cancel", authMiddleware.RequireAuth(classBookingHandler.Cancel))
 	mux.HandleFunc("DELETE /api/office-bookings/{id}", authMiddleware.RequireAuth(handlers.DeleteOfficeBooking(officeBookingCollection)))
 
 	// User management routes - require authentication (admin only in the future)
@@ -136,7 +152,7 @@ func main() {
 
 	// Create server
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         "0.0.0.0:8080", // Bind to all network interfaces
 		Handler:      corsMiddleware(mux),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,

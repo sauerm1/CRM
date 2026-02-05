@@ -11,7 +11,8 @@ export default function NewUserPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    name: '',
+    first_name: '',
+    last_name: '',
     password: '',
     role: 'all_services',
     assigned_club_ids: [] as string[],
@@ -69,16 +70,30 @@ export default function NewUserPage() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 max-w-2xl">
         <div className="space-y-4">
-          {/* Name */}
+          {/* First Name */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">
-              Name *
+              First Name *
             </label>
             <input
               type="text"
               required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              className="w-full border border-gray-300 rounded-md p-2 text-gray-900"
+            />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              Last Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
               className="w-full border border-gray-300 rounded-md p-2 text-gray-900"
             />
           </div>

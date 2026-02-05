@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getOffice, getOfficeBookings, getClubs } from '@/lib/api';
+import { getOffice, getOfficeBookings, getClubs, deleteOffice } from '@/lib/api';
 import { Office, OfficeBooking, Club } from '@/types';
 
 export default function OfficeDetailsPage() {
@@ -61,6 +61,19 @@ export default function OfficeDetailsPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!office) return;
+    if (!window.confirm(`Are you sure you want to delete office space "${office.name}"? This action cannot be undone.`)) return;
+
+    try {
+      await deleteOffice(office.id!);
+      router.push('/dashboard/offices');
+    } catch (error: any) {
+      console.error('Failed to delete office:', error);
+      alert('Failed to delete office: ' + error.message);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-gray-900">Loading...</div>;
   }
@@ -90,6 +103,12 @@ export default function OfficeDetailsPage() {
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               Edit Office
+            </button>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Delete
             </button>
             <button
               onClick={() => router.push(`/dashboard/offices/${id}/bookings/new`)}

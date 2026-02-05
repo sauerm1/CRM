@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getInstructor, getClubs, getClasses } from '@/lib/api';
+import { getInstructor, getClubs, getClasses, deleteInstructor } from '@/lib/api';
 import { Instructor, Club, Class } from '@/types';
 
 export default function InstructorDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +59,19 @@ export default function InstructorDetailPage({ params }: { params: Promise<{ id:
     return classes.filter(c => new Date(c.date) < now).slice(0, 5);
   };
 
+  const handleDelete = async () => {
+    if (!instructor) return;
+    if (!window.confirm(`Are you sure you want to delete instructor "${instructor.name}"? This action cannot be undone.`)) return;
+
+    try {
+      await deleteInstructor(instructor.id!);
+      router.push('/dashboard/instructors');
+    } catch (error: any) {
+      console.error('Failed to delete instructor:', error);
+      alert('Failed to delete instructor: ' + error.message);
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-gray-900">Loading...</div>;
   }
@@ -92,6 +105,12 @@ export default function InstructorDetailPage({ params }: { params: Promise<{ id:
             >
               Edit Instructor
             </Link>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Delete
+            </button>
             <span className={`px-3 py-2 rounded-md text-sm font-medium ${
               instructor.active 
                 ? 'bg-green-100 text-green-800' 

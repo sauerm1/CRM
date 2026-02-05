@@ -11,8 +11,14 @@ export default function Index() {
   }, []);
 
   const checkAuth = async () => {
-    const authenticated = await apiService.isAuthenticated();
-    setIsAuthenticated(authenticated);
+    try {
+      const authenticated = await apiService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      // If there's an error checking auth, assume not authenticated
+      setIsAuthenticated(false);
+    }
   };
 
   if (isAuthenticated === null) {

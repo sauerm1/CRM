@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import apiService from '../../services/api';
 import type { Class } from '../../types';
@@ -15,6 +16,7 @@ export default function ClassesScreen() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [bookingClass, setBookingClass] = useState<string | null>(null);
 
   const loadClasses = async () => {
     try {
@@ -22,6 +24,7 @@ export default function ClassesScreen() {
       setClasses(data);
     } catch (error) {
       console.error('Failed to load classes:', error);
+      Alert.alert('Error', 'Failed to load classes');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -35,6 +38,26 @@ export default function ClassesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     loadClasses();
+  };
+
+  const handleBookClass = async (classId: string) => {
+    if (!classId) {
+      Alert.alert('Error', 'Invalid class ID');
+      return;
+    }
+
+    setBookingClass(classId);
+    try {
+      await apiService.createClassBooking({ class_id: classId });
+      Alert.alert('Success', 'Class booked successfully!', [
+        { text: 'OK', onPress: () => loadClasses() }
+      ]);
+    } catch (error: any) {
+      console.error('Error booking class:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to book class');
+    } finally {
+      setBookingClass(null);
+    }
   };
 
   const renderClass = ({ item }: { item: Class }) => (
@@ -63,8 +86,19 @@ export default function ClassesScreen() {
         {item.duration && <Text style={styles.detailText}>⏱️ {item.duration} min</Text>}
       </View>
 
-      <TouchableOpacity style={styles.bookButton}>
-        <Text style={styles.bookButtonText}>Book Class</Text>
+      <TouchableOpacity
+        style={[
+          styles.bookButton,
+          bookingClass === item.id && styles.bookButtonDisabled
+        ]}
+        onPress={() => handleBookClass(item.id!)}
+        disabled={bookingClass === item.id}
+      >
+        {bookingClass === item.id ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.bookButtonText}>Book Class</Text>
+        )}
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -179,6 +213,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  bookButtonDisabled: {
+    backgroundColor: '#9ca3af',
   },
   bookButtonText: {
     color: 'white',

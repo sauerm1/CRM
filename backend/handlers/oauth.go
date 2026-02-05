@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"go-api-mongo/config"
@@ -300,15 +301,25 @@ func (h *OAuthHandler) createOrUpdateUser(provider string, userInfo map[string]i
 	err := collection.FindOne(ctx, filter).Decode(&existingUser)
 
 	if err == mongo.ErrNoDocuments {
+		// Split name into first and last name
+		nameParts := strings.SplitN(name, " ", 2)
+		firstName := nameParts[0]
+		lastName := ""
+		if len(nameParts) > 1 {
+			lastName = nameParts[1]
+		}
+
 		// Create new user
 		user := models.User{
-			Email:      email,
-			Name:       name,
-			Picture:    picture,
-			Provider:   provider,
-			ProviderID: providerID,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
+			Name:      name, // Keep for backwards compatibility
+			Picture:   picture,
+			Role:      "all_services", // Default role for OAuth users
+			Active:    true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		result, err := collection.InsertOne(ctx, user)

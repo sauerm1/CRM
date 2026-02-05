@@ -14,6 +14,14 @@ export interface Member {
   notes?: string;
   created_at?: string;
   updated_at?: string;
+  billing_history?: BillingEntry[];
+}
+
+export interface BillingEntry {
+  date: string;
+  amount: number;
+  description: string;
+  status: string; // paid, pending, failed, refunded
 }
 
 export interface Class {
@@ -44,7 +52,9 @@ export interface ClassWithMembers extends Class {
 export interface User {
   id: string;
   email: string;
-  name?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string; // Deprecated, kept for backwards compatibility
   role?: string; // admin, club_manager, all_services, restaurant, office, classes
   assigned_club_ids?: string[];
   active?: boolean;

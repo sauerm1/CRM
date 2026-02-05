@@ -1,11 +1,12 @@
 import { Platform } from 'react-native';
 
 // API Configuration
-// Use your computer's local IP address when running on physical device or Expo Go
-// For iOS Simulator, use localhost; for Android Emulator, use 10.0.2.2
+// For iOS Simulator: use 127.0.0.1 or localhost
+// For Android Emulator: use 10.0.2.2
+// For physical devices: use your computer's network IP (e.g., 10.7.150.85)
 export const API_BASE_URL = __DEV__
   ? Platform.OS === 'ios'
-    ? 'http://192.168.13.237:8080' // Your computer's IP - change if needed
+    ? 'http://127.0.0.1:8080' // iOS Simulator
     : 'http://10.0.2.2:8080' // Android emulator
   : 'https://your-production-api.com';
 
