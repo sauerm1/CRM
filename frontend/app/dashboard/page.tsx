@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getCurrentUser, logout, getMembers, getClubs, getRestaurants, getClasses, getInstructors, getOffices, getOfficeBookings } from '@/lib/api';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { User } from '@/types';
+import RevenueChart from './RevenueChart';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function DashboardPage() {
         getOfficeBookings().catch(() => []),
       ]);
       
-      setUser(userData.user);
+      setUser(userData);
       
       // Calculate stats
       const activeMembers = membersData?.filter((m: any) => m.status === 'active').length || 0;
@@ -102,16 +103,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      window.location.href = '/login';
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -141,12 +132,6 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold text-gray-900">The Field Dashboard</h1>
               <div className="flex items-center gap-4">
                 <span className="text-sm text-gray-600">Welcome, {user?.first_name || user?.name || user?.email}</span>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
-                >
-                  Logout
-                </button>
               </div>
             </div>
           </div>
@@ -234,6 +219,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Revenue Analytics Chart - Full Width */}
+        <RevenueChart />
+
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Membership Types Chart */}
@@ -247,7 +235,7 @@ export default function DashboardPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -300,40 +288,6 @@ export default function DashboardPage() {
             ) : (
               <p className="text-gray-500 text-center py-12">No office data available</p>
             )}
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Access</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {quickLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`${link.color} text-white rounded-lg p-3 text-2xl`}>
-                    {link.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
-                      {link.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">{link.count} total</p>
-                  </div>
-                </div>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-hover:text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ))}
           </div>
         </div>
       </div>

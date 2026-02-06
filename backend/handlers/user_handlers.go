@@ -237,6 +237,7 @@ func UpdateUser(collection *mongo.Collection) http.HandlerFunc {
 		}
 
 		var input struct {
+			Email           string   `json:"email"`
 			FirstName       string   `json:"first_name"`
 			LastName        string   `json:"last_name"`
 			Role            string   `json:"role"`
@@ -305,6 +306,22 @@ func UpdateUser(collection *mongo.Collection) http.HandlerFunc {
 			},
 		}
 
+		if input.Email != "" {
+			// Check if email is already in use by another user
+			var existingUser models.User
+			err := collection.FindOne(context.Background(), bson.M{
+				"email": input.Email,
+				"_id":   bson.M{"$ne": objID}, // Exclude current user
+			}).Decode(&existingUser)
+			if err == nil {
+				http.Error(w, "Email already in use", http.StatusConflict)
+				return
+			} else if err != mongo.ErrNoDocuments {
+				http.Error(w, "Error checking email availability", http.StatusInternalServerError)
+				return
+			}
+			update["$set"].(bson.M)["email"] = input.Email
+		}
 		if input.FirstName != "" {
 			update["$set"].(bson.M)["first_name"] = input.FirstName
 		}

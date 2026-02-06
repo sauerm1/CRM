@@ -3,6 +3,7 @@ module go-api-mongo
 go 1.24.0
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	go.mongodb.org/mongo-driver v1.13.1
 	golang.org/x/crypto v0.47.0
 	golang.org/x/oauth2 v0.16.0

@@ -45,19 +45,17 @@ func main() {
 	}
 	defer db.Disconnect()
 
-	// Initialize OAuth and session configuration
-	oauthConfig := config.InitOAuthConfig()
-	sessionConfig := config.InitSessionConfig()
+	// Initialize JWT configuration
+	jwtConfig := config.InitJWTConfig()
 
 	// Initialize handlers with database
 	h := handlers.NewHandler(db)
-	oauthHandler := handlers.NewOAuthHandler(db.Client.Database(db.DatabaseName), oauthConfig, sessionConfig)
-	localAuthHandler := handlers.NewLocalAuthHandler(db.Client.Database(db.DatabaseName), sessionConfig)
+	localAuthHandler := handlers.NewLocalAuthHandler(db.Client.Database(db.DatabaseName), jwtConfig)
 	memberHandler := handlers.NewMemberHandler(db.Client.Database(db.DatabaseName))
 	classHandler := handlers.NewClassHandler(db.Client.Database(db.DatabaseName))
 	instructorHandler := handlers.NewInstructorHandler(db.Client.Database(db.DatabaseName))
 	clubHandler := handlers.NewClubHandler(db.Client.Database(db.DatabaseName))
-	authMiddleware := middleware.NewAuthMiddleware(db.Client.Database(db.DatabaseName), sessionConfig)
+	authMiddleware := middleware.NewAuthMiddleware(db.Client.Database(db.DatabaseName), jwtConfig)
 
 	// Initialize restaurant and reservation collections
 	restaurantCollection := db.Client.Database(db.DatabaseName).Collection("restaurants")
@@ -66,6 +64,7 @@ func main() {
 	officeBookingCollection := db.Client.Database(db.DatabaseName).Collection("office_bookings")
 	classBookingCollection := db.Client.Database(db.DatabaseName).Collection("class_bookings")
 	userCollection := db.Client.Database(db.DatabaseName).Collection("users")
+	membersCollection := db.Client.Database(db.DatabaseName).Collection("members")
 
 	// Setup routes
 	mux := http.NewServeMux()
@@ -75,17 +74,12 @@ func main() {
 
 	// Local authentication routes
 	mux.HandleFunc("/auth/login", localAuthHandler.Login)
-	mux.HandleFunc("/auth/refresh", localAuthHandler.RefreshToken)
-
-	// OAuth routes
-	mux.HandleFunc("/auth/google", oauthHandler.GoogleLogin)
-	mux.HandleFunc("/auth/github", oauthHandler.GitHubLogin)
-	mux.HandleFunc("/auth/callback/google", oauthHandler.GoogleCallback)
-	mux.HandleFunc("/auth/callback/github", oauthHandler.GitHubCallback)
-	mux.HandleFunc("/auth/logout", oauthHandler.Logout)
 
 	// Protected routes - require authentication
-	mux.HandleFunc("/api/me", authMiddleware.RequireAuth(oauthHandler.Me))
+	mux.HandleFunc("/api/me", authMiddleware.RequireAuth(handlers.Me))
+	
+	// Revenue analytics routes - require authentication
+	mux.HandleFunc("GET /api/revenue", authMiddleware.RequireAuth(handlers.GetRevenueAnalytics(officeBookingCollection, membersCollection)))
 
 	// Member CRM routes - require authentication
 	mux.HandleFunc("/api/members", authMiddleware.RequireAuth(memberHandler.MembersHandler))

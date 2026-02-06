@@ -1,52 +1,32 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-// Track if we're currently refreshing the token to avoid multiple simultaneous refresh requests
-let isRefreshing = false;
-let refreshPromise: Promise<any> | null = null;
+// Token management
+const TOKEN_KEY = 'auth_token';
 
-// Helper function to refresh the access token
-const refreshAccessToken = async () => {
-  if (isRefreshing && refreshPromise) {
-    return refreshPromise;
-  }
-
-  isRefreshing = true;
-  refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-  }).then(async (response) => {
-    isRefreshing = false;
-    refreshPromise = null;
-    if (!response.ok) {
-      throw new Error('Failed to refresh token');
-    }
-    return response.json();
-  }).catch((error) => {
-    isRefreshing = false;
-    refreshPromise = null;
-    throw error;
-  });
-
-  return refreshPromise;
+const getToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(TOKEN_KEY);
 };
 
-// Helper function to handle API responses with automatic token refresh
-const handleResponse = async (response: Response, originalRequest?: () => Promise<Response>) => {
-  // If we get a 401 and we have a function to retry the request
-  if (response.status === 401 && originalRequest) {
-    try {
-      // Try to refresh the token
-      await refreshAccessToken();
-      // Retry the original request
-      const retryResponse = await originalRequest();
-      return handleResponse(retryResponse);
-    } catch (refreshError) {
-      // If refresh fails, redirect to login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired. Please login again.');
+const setToken = (token: string) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
+const removeToken = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(TOKEN_KEY);
+};
+
+// Helper function to handle API responses
+const handleResponse = async (response: Response) => {
+  if (response.status === 401) {
+    // Token expired or invalid, redirect to login
+    removeToken();
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
     }
+    throw new Error('Session expired. Please login again.');
   }
 
   if (!response.ok) {
@@ -55,6 +35,7 @@ const handleResponse = async (response: Response, originalRequest?: () => Promis
     console.error(`API Error: ${errorMessage}`, { status: response.status, url: response.url });
     throw new Error(errorMessage);
   }
+  
   // Handle 204 No Content responses
   if (response.status === 204) {
     return { message: 'Success' };
@@ -62,52 +43,66 @@ const handleResponse = async (response: Response, originalRequest?: () => Promis
   return response.json();
 };
 
-// Helper to make authenticated API calls with auto-refresh
+// Helper to make authenticated API calls
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-  const makeRequest = () => fetch(url, { ...options, credentials: 'include' });
-  const response = await makeRequest();
-  return handleResponse(response, makeRequest);
-};
+  const token = getToken();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
 
-// Auth APIs
-export const register = async (email: string, password: string, name: string) => {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password, name }),
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
   });
+  
   return handleResponse(response);
 };
 
+// Auth APIs
 export const login = async (email: string, password: string) => {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify({ email, password }),
   });
-  return handleResponse(response);
+  
+  const data = await handleResponse(response);
+  if (data.token) {
+    setToken(data.token);
+  }
+  return data;
 };
 
 export const logout = async () => {
-  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-    method: 'POST',
-    credentials: 'include',
-  });
-  if (response.ok) {
-    return response.json();
+  removeToken();
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
   }
-  return { message: 'Logged out' };
+  return { message: 'Logged out successfully' };
 };
 
 export const getCurrentUser = async () => {
   return authenticatedFetch(`${API_BASE_URL}/api/me`);
 };
 
-// OAuth URLs
-export const getGoogleLoginUrl = () => `${API_BASE_URL}/auth/google`;
-export const getGitHubLoginUrl = () => `${API_BASE_URL}/auth/github`;
+// Revenue Analytics APIs
+export const getRevenueAnalytics = async (params: {
+  start_date?: string;
+  end_date?: string;
+  group_by?: 'day' | 'month';
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params.start_date) queryParams.append('start_date', params.start_date);
+  if (params.end_date) queryParams.append('end_date', params.end_date);
+  if (params.group_by) queryParams.append('group_by', params.group_by);
+  
+  return authenticatedFetch(`${API_BASE_URL}/api/revenue?${queryParams.toString()}`);
+};
 
 // Member APIs (CRM)
 export const getMembers = async () => {
@@ -116,13 +111,11 @@ export const getMembers = async () => {
 
 export const getMember = async (id: string) => {
   return authenticatedFetch(`${API_BASE_URL}/api/members/${id}`);
-  return handleResponse(response);
 };
 
 export const createMember = async (member: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/members`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(member),
   });
 };
@@ -130,7 +123,6 @@ export const createMember = async (member: any) => {
 export const updateMember = async (id: string, member: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/members/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(member),
   });
 };
@@ -157,7 +149,6 @@ export const getClassWithMembers = async (id: string) => {
 export const createClass = async (classData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/classes`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(classData),
   });
 };
@@ -165,7 +156,6 @@ export const createClass = async (classData: any) => {
 export const updateClass = async (id: string, classData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/classes/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(classData),
   });
 };
@@ -179,7 +169,6 @@ export const deleteClass = async (id: string) => {
 export const enrollMember = async (classId: string, memberId: string) => {
   return authenticatedFetch(`${API_BASE_URL}/api/classes/${classId}/enroll`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ member_id: memberId }),
   });
 };
@@ -202,7 +191,6 @@ export const getInstructor = async (id: string) => {
 export const createInstructor = async (instructorData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/instructors`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(instructorData),
   });
 };
@@ -210,7 +198,6 @@ export const createInstructor = async (instructorData: any) => {
 export const updateInstructor = async (id: string, instructorData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/instructors/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(instructorData),
   });
 };
@@ -233,7 +220,6 @@ export const getClub = async (id: string) => {
 export const createClub = async (clubData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/clubs`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(clubData),
   });
 };
@@ -241,7 +227,6 @@ export const createClub = async (clubData: any) => {
 export const updateClub = async (id: string, clubData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/clubs/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(clubData),
   });
 };
@@ -264,7 +249,6 @@ export const getRestaurant = async (id: string) => {
 export const createRestaurant = async (restaurantData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/restaurants`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(restaurantData),
   });
 };
@@ -272,7 +256,6 @@ export const createRestaurant = async (restaurantData: any) => {
 export const updateRestaurant = async (id: string, restaurantData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/restaurants/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(restaurantData),
   });
 };
@@ -298,7 +281,6 @@ export const getReservation = async (id: string) => {
 export const createReservation = async (reservationData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/reservations`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reservationData),
   });
 };
@@ -306,7 +288,6 @@ export const createReservation = async (reservationData: any) => {
 export const updateReservation = async (id: string, reservationData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/reservations/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reservationData),
   });
 };
@@ -332,7 +313,6 @@ export const getOffice = async (id: string) => {
 export const createOffice = async (officeData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/offices`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(officeData),
   });
 };
@@ -340,7 +320,6 @@ export const createOffice = async (officeData: any) => {
 export const updateOffice = async (id: string, officeData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/offices/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(officeData),
   });
 };
@@ -370,7 +349,6 @@ export const getOfficeBooking = async (id: string) => {
 export const createOfficeBooking = async (bookingData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/office-bookings`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bookingData),
   });
 };
@@ -378,7 +356,6 @@ export const createOfficeBooking = async (bookingData: any) => {
 export const updateOfficeBooking = async (id: string, bookingData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/office-bookings/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bookingData),
   });
 };
@@ -408,7 +385,6 @@ export const getUser = async (id: string) => {
 export const createUser = async (userData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/users`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
   });
 };
@@ -416,7 +392,6 @@ export const createUser = async (userData: any) => {
 export const updateUser = async (id: string, userData: any) => {
   return authenticatedFetch(`${API_BASE_URL}/api/users/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
   });
 };
@@ -430,9 +405,6 @@ export const deleteUser = async (id: string) => {
 export const changePassword = async (currentPassword: string, newPassword: string) => {
   return authenticatedFetch(`${API_BASE_URL}/api/me/change-password`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({
       current_password: currentPassword,
       new_password: newPassword,

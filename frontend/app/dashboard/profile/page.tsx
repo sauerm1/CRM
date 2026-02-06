@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser } from '@/lib/api';
+import { getCurrentUser, logout } from '@/lib/api';
 import { User } from '@/types';
 
 export default function ProfilePage() {
@@ -34,6 +34,16 @@ export default function ProfilePage() {
       case 'office': return 'Office/Co-working';
       case 'classes': return 'Classes';
       default: return role;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      window.location.href = '/login';
     }
   };
 
@@ -78,6 +88,24 @@ export default function ProfilePage() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 Change Password
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Session</h2>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Sign out of your account on this device.
+              </p>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              >
+                Logout
               </button>
             </div>
           </div>

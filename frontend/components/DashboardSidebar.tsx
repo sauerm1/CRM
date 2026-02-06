@@ -79,25 +79,24 @@ export default function DashboardSidebar({ isOpen, setIsOpen }: DashboardSidebar
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white transition-transform duration-300 ease-in-out z-40 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{ width: '250px' }}
+        className={`fixed top-0 left-0 h-full bg-gray-800 text-white transition-all duration-300 ease-in-out z-40`}
+        style={{ width: isOpen ? '250px' : '64px' }}
       >
-        <div className="pt-16 px-4">
+        <div className={`pt-16 ${isOpen ? 'px-4' : 'px-2'}`}>
           <nav className="space-y-2">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+                className={`flex items-center ${isOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-md transition-colors ${
                   isActive(item.href)
                     ? 'bg-gray-700 text-white font-medium'
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
+                title={!isOpen ? item.name : undefined}
               >
                 <span className="text-xl">{item.icon}</span>
-                <span>{item.name}</span>
+                {isOpen && <span>{item.name}</span>}
               </Link>
             ))}
           </nav>
