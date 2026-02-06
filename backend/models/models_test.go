@@ -7,9 +7,9 @@ import (
 
 func TestUserModel(t *testing.T) {
 	user := User{
-		Email: "test@example.com",
+		Email:     "test@example.com",
 		FirstName: "Test",
-		LastName: "User",
+		LastName:  "User",
 		CreatedAt: time.Now(),
 	}
 	if user.Email != "test@example.com" {

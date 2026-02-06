@@ -21,11 +21,11 @@ type RevenueDataPoint struct {
 
 // RevenueAnalyticsResponse contains the aggregated revenue data
 type RevenueAnalyticsResponse struct {
-	Data       []RevenueDataPoint `json:"data"`
-	TotalRevenue float64          `json:"total_revenue"`
-	Period     string             `json:"period"`
-	StartDate  string             `json:"start_date"`
-	EndDate    string             `json:"end_date"`
+	Data         []RevenueDataPoint `json:"data"`
+	TotalRevenue float64            `json:"total_revenue"`
+	Period       string             `json:"period"`
+	StartDate    string             `json:"start_date"`
+	EndDate      string             `json:"end_date"`
 }
 
 // GetRevenueAnalytics returns revenue data aggregated by day or month

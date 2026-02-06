@@ -77,7 +77,7 @@ func main() {
 
 	// Protected routes - require authentication
 	mux.HandleFunc("/api/me", authMiddleware.RequireAuth(handlers.Me))
-	
+
 	// Revenue analytics routes - require authentication
 	mux.HandleFunc("GET /api/revenue", authMiddleware.RequireAuth(handlers.GetRevenueAnalytics(officeBookingCollection, membersCollection)))
 

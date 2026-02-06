@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"bytes"
+	"go-api-mongo/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"go-api-mongo/config"
 )
 
 func TestLoginValidation(t *testing.T) {
